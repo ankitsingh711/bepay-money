@@ -28,12 +28,13 @@ const WORDS = [
 ];
 
 function makePhrase(seed: number): string[] {
-  // deterministic-ish 12 words for the demo
+  // deterministic 12 words for the demo, well-distributed across the wordlist
   const out: string[] = [];
-  let s = seed;
+  let s = (seed >>> 0) || 1;
   for (let i = 0; i < 12; i++) {
-    s = (s * 1103515245 + 12345) & 0x7fffffff;
-    out.push(WORDS[s % WORDS.length]);
+    // mix with the index and a Knuth multiplier, then read the high bits
+    s = Math.imul(s ^ (i + 1), 2654435761) >>> 0;
+    out.push(WORDS[(s >>> 8) % WORDS.length]);
   }
   return out;
 }
