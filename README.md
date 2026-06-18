@@ -93,6 +93,7 @@ Component → React Query hook → service fn → fetch (apiClient) → MSW hand
 | GET | `/api/payment-links` | `status`, `search`, `page`, `limit` |
 | POST | `/api/payment-links` | validates, returns the created link (201) |
 | GET | `/api/payment-links/:id` | includes the associated transaction once paid |
+| GET | `/api/wallet` | balance, address, and per-token holdings |
 
 All handlers add artificial latency so loading states are visible; error responses are returned for missing resources so error states are exercised.
 
@@ -131,6 +132,17 @@ Currency amounts are stored as **decimal strings** and all arithmetic goes throu
 - Shared **split auth layout** (rotating onboarding carousel + form) matching the Figma.
 - **Mocked session** persisted in `localStorage` via `useSyncExternalStore`; a **route guard** redirects unauthenticated users to `/login`, "Log out" clears the session, and onboarding draft state is carried across steps in `sessionStorage`.
 - No real backend/credentials — any input works (e.g. the OTP accepts any 6 digits).
+
+### F. Wallet & money movement (mocked)
+- Dashboard **"My Account Info" wallet card**: balance (with hide toggle), address, and **Send / Receive / Pay Link / Swap** quick actions.
+- **Send** (token → amount → recipient → review → success), **Receive** (address + QR), **Swap** (token-to-token with indicative rate), **Withdraw** (amount → destination → OTP → success, opened from the topbar). All multi-step dialogs with validation and mocked confirmations. Backed by `GET /api/wallet`.
+
+### G. Public payment page (`/pay/[id]`)
+- The customer-facing page a payment link resolves to — outside the app shell and unauthenticated.
+- Branded hero (tagline + business name from Appearance settings), amount/token/network, QR, one-tap **Pay** (mocked) → success, plus **paid / expired** states. Reachable via "Preview payment page" on the link detail.
+
+### H. Account & settings
+- Settings shell with sub-nav: **My Profile** (basic info, avatar picker, change phone via OTP), **Wallet Security** (manage wallets, create-wallet flow with seed-phrase backup, reveal recovery phrase), **Appearance** (business name, tagline, brand color with a **live preview** that drives the public pay page).
 
 ### Cross-cutting
 - Loading **skeletons**, **empty** states, **error** states with retry, validation feedback, toasts.
