@@ -42,9 +42,14 @@ export default function PaymentLinksPage() {
   const [page, setPage] = React.useState(1);
   const debouncedSearch = useDebounce(search);
 
-  React.useEffect(() => {
+  function handleSearch(v: string) {
+    setSearch(v);
     setPage(1);
-  }, [debouncedSearch, status]);
+  }
+  function handleStatus(v: PaymentLinkStatus | "all") {
+    setStatus(v);
+    setPage(1);
+  }
 
   const { data, isLoading, isError, isFetching, refetch } = usePaymentLinks({
     search: debouncedSearch || undefined,
@@ -63,7 +68,7 @@ export default function PaymentLinksPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search links by title or reference"
             className="h-10 rounded-full pl-9"
             aria-label="Search payment links"
@@ -90,7 +95,7 @@ export default function PaymentLinksPage() {
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setStatus(t.value)}
+              onClick={() => handleStatus(t.value)}
               className={cn(
                 "shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors",
                 active

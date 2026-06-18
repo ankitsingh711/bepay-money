@@ -42,10 +42,20 @@ export default function PaymentsPage() {
 
   const debouncedSearch = useDebounce(search);
 
-  // Reset to first page whenever filters change.
-  React.useEffect(() => {
+  // Reset to the first page whenever a filter changes (handled in the change
+  // handlers below rather than an effect to avoid cascading renders).
+  function handleSearch(v: string) {
+    setSearch(v);
     setPage(1);
-  }, [debouncedSearch, status, filters]);
+  }
+  function handleStatus(v: TransactionStatus | "all") {
+    setStatus(v);
+    setPage(1);
+  }
+  function handleFilters(v: AdvancedFilters) {
+    setFilters(v);
+    setPage(1);
+  }
 
   const query = {
     search: debouncedSearch || undefined,
@@ -76,20 +86,20 @@ export default function PaymentsPage() {
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Search by ID, title or reference"
             className="h-10 rounded-full pl-9"
             aria-label="Search transactions"
           />
         </div>
         <div className="flex items-center gap-2">
-          <FiltersSheet value={filters} onApply={setFilters} />
+          <FiltersSheet value={filters} onApply={handleFilters} />
           <ExportDialog query={query} />
         </div>
       </div>
 
       <div className="overflow-x-auto pb-1">
-        <StatusFilter value={status} onChange={setStatus} />
+        <StatusFilter value={status} onChange={handleStatus} />
       </div>
 
       <Card className="overflow-hidden">

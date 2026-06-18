@@ -9,7 +9,7 @@ export default function SettingsPage() {
         <EmptyState
           icon={<Settings className="size-6" />}
           title="Settings"
-          description="Merchant settings, API keys and team management would live here. Out of scope for this assignment."
+          description="Merchant settings, API keys and team management would live here."
         />
       </Card>
     </div>

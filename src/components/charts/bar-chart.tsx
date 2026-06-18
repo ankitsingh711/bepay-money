@@ -22,14 +22,14 @@ export function BarChart({
   const max = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <div className={cn("flex h-40 items-end gap-2 sm:gap-3", className)}>
+    <div className={cn("flex h-40 items-stretch gap-2 sm:gap-3", className)}>
       {data.map((d, i) => {
         const heightPct = Math.max((d.value / max) * 100, 4);
         const highlighted = i === highlightIndex;
         return (
           <div
             key={d.label}
-            className="flex flex-1 flex-col items-center gap-2"
+            className="flex h-full flex-1 flex-col items-center gap-2"
           >
             <div className="flex w-full flex-1 items-end">
               <div

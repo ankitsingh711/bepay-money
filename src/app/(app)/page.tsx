@@ -60,7 +60,7 @@ export default function DashboardPage() {
             Welcome back — here’s your payment activity.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select defaultValue="month">
             <SelectTrigger className="h-10 w-[150px] rounded-full">
               <SelectValue />

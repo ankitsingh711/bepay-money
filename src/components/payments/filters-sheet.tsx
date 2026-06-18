@@ -45,9 +45,11 @@ export function FiltersSheet({
   const [open, setOpen] = React.useState(false);
   const [draft, setDraft] = React.useState<AdvancedFilters>(value);
 
-  React.useEffect(() => {
-    if (open) setDraft(value);
-  }, [open, value]);
+  // Sync the working draft with the applied filters whenever the sheet opens.
+  function handleOpenChange(next: boolean) {
+    if (next) setDraft(value);
+    setOpen(next);
+  }
 
   const activeCount =
     (value.network !== "all" ? 1 : 0) +
@@ -55,7 +57,7 @@ export function FiltersSheet({
     (value.to ? 1 : 0);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
         <Button variant="outline" size="sm" className="h-10">
           <SlidersHorizontal />

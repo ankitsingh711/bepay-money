@@ -30,17 +30,17 @@ export function DonutChart({
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
 
-  let offset = 0;
-  const arcs = segments.map((s) => {
-    const fraction = s.value / total;
-    const dash = fraction * circumference;
-    const arc = {
+  // Precompute cumulative offsets without mutating across the render.
+  const arcs = segments.map((s, i) => {
+    const precedingDash = segments
+      .slice(0, i)
+      .reduce((sum, p) => sum + (p.value / total) * circumference, 0);
+    const dash = (s.value / total) * circumference;
+    return {
       ...s,
       dasharray: `${dash} ${circumference - dash}`,
-      dashoffset: -offset,
+      dashoffset: -precedingDash,
     };
-    offset += dash;
-    return arc;
   });
 
   return (

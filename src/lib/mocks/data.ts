@@ -141,20 +141,31 @@ export function buildSeed(): {
   }
 
   // A spread of standalone transactions across all statuses.
+  // A transaction may reference a non-paid link (active/expired) — when it does
+  // it inherits the link's amount/token/network so the data stays coherent.
+  // Each link gets at most one associated transaction.
+  const linkedAlready = new Set<string>();
   for (let i = 0; i < 36; i++) {
     const num = 2000 + i;
-    const token = pick(TOKENS);
-    const network = pick(NETWORKS);
     const status = TX_STATUSES[i % TX_STATUSES.length];
     const createdMs = Math.floor(rand() * 30 * DAY);
-    const amt = amount();
-    const linkRef = rand() > 0.4 ? pick(paymentLinks) : undefined;
+    const candidate = rand() > 0.4 ? pick(paymentLinks) : undefined;
+    const linkRef =
+      candidate &&
+      candidate.status !== "paid" &&
+      !linkedAlready.has(candidate.id)
+        ? candidate
+        : undefined;
+    if (linkRef) linkedAlready.add(linkRef.id);
+    const token = linkRef ? linkRef.currency : pick(TOKENS);
+    const network = linkRef ? linkRef.network : pick(NETWORKS);
+    const amt = linkRef ? linkRef.amount : amount();
     transactions.push({
       id: `tx_${num}`,
       paymentLinkId: linkRef?.id,
       paymentLinkTitle: linkRef?.title,
       customerReference: pick(CUSTOMERS),
-      externalReference: rand() > 0.5 ? `ORD-${num}` : undefined,
+      externalReference: linkRef?.externalReference,
       amount: amt,
       currency: token,
       network,
