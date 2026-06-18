@@ -17,6 +17,8 @@ export function DonutChart({
   thickness = 18,
   centerLabel,
   centervalue,
+  trackColor = "var(--muted)",
+  centerClassName,
   className,
 }: {
   segments: DonutSegment[];
@@ -24,6 +26,8 @@ export function DonutChart({
   thickness?: number;
   centerLabel?: string;
   centervalue?: string;
+  trackColor?: string;
+  centerClassName?: string;
   className?: string;
 }) {
   const total = segments.reduce((sum, s) => sum + s.value, 0) || 1;
@@ -54,7 +58,7 @@ export function DonutChart({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="var(--muted)"
+          stroke={trackColor}
           strokeWidth={thickness}
         />
         {arcs.map((a) => (
@@ -73,13 +77,16 @@ export function DonutChart({
         ))}
       </svg>
       {(centerLabel || centervalue) && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+        <div
+          className={cn(
+            "absolute inset-0 flex flex-col items-center justify-center text-center",
+            centerClassName,
+          )}
+        >
           {centervalue && (
             <span className="text-2xl font-semibold">{centervalue}</span>
           )}
-          {centerLabel && (
-            <span className="text-xs text-muted-foreground">{centerLabel}</span>
-          )}
+          {centerLabel && <span className="text-xs opacity-70">{centerLabel}</span>}
         </div>
       )}
     </div>
