@@ -85,6 +85,11 @@ export interface CreatePaymentLinkInput {
 export interface TransactionQuery {
   status?: TransactionStatus | "all";
   search?: string;
+  network?: Network | "all";
+  /** ISO date (yyyy-mm-dd) inclusive lower bound on createdAt. */
+  from?: string;
+  /** ISO date (yyyy-mm-dd) inclusive upper bound on createdAt. */
+  to?: string;
   page?: number;
   limit?: number;
 }

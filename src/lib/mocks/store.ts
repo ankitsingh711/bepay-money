@@ -49,6 +49,18 @@ export function listTransactions(q: TransactionQuery): Paginated<Transaction> {
         t.externalReference?.toLowerCase().includes(s),
     );
   }
+  if (q.network && q.network !== "all") {
+    items = items.filter((t) => t.network === q.network);
+  }
+  if (q.from) {
+    const fromMs = new Date(q.from).getTime();
+    items = items.filter((t) => +new Date(t.createdAt) >= fromMs);
+  }
+  if (q.to) {
+    // inclusive end-of-day
+    const toMs = new Date(q.to).getTime() + 24 * 3600_000;
+    items = items.filter((t) => +new Date(t.createdAt) <= toMs);
+  }
   return paginate(items, q.page, q.limit);
 }
 

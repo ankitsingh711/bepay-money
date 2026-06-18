@@ -5,6 +5,7 @@
 import { http, HttpResponse } from "msw";
 import type {
   CreatePaymentLinkInput,
+  Network,
   PaymentLinkStatus,
   TransactionStatus,
 } from "@/lib/types";
@@ -41,6 +42,10 @@ export const handlers = [
     const result = listTransactions({
       status: (url.searchParams.get("status") as TransactionStatus) || "all",
       search: url.searchParams.get("search") || undefined,
+      network:
+        (url.searchParams.get("network") as Network | null) || undefined,
+      from: url.searchParams.get("from") || undefined,
+      to: url.searchParams.get("to") || undefined,
       page: intParam(url.searchParams.get("page"), 1),
       limit: intParam(url.searchParams.get("limit"), 10),
     });
