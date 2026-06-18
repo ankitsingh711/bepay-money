@@ -106,10 +106,14 @@ Currency amounts are stored as **decimal strings** and all arithmetic goes throu
 ## Features implemented
 
 ### A. Dashboard
-- Four summary metric cards (total received, successful, pending, failed/expired) with period-over-period deltas.
-- Turnover bar chart + holdings donut (dependency-free SVG).
-- Recent transactions with row → detail drawer.
-- Controls: **period filter**, **refresh** (with spinner), and **Create payment link** CTA.
+Built to match the provided Figma dashboard: a dark app shell (collapsible sidebar with profile, dark topbar with white **Withdraw**) wrapping a white content panel containing —
+- **Premium card**, **Payouts** & **Turnover** stat cards.
+- **My Account Info**: live wallet balance (from `GET /api/wallet`, hide toggle) + **Send / Receive / Pay Link / Swap** actions.
+- **Total Monthly Turnover** panel: Week/Month/Year/Custom tabs + bar chart (with highlighted month tooltip) + **Plan for May** progress donut.
+- **Payments** market table and **Total Monthly Tokens** donut + holdings list.
+- Loyalty promo cards.
+
+> Product note: the brief lists four KPI cards (total received / successful / pending / failed-expired). The provided design instead shows Payouts/Turnover/Monthly-Turnover, so the dashboard follows the design. The pending/confirmed/failed/expired breakdown is fully available on **Payment History** via its status filters.
 
 ### B. Payment history
 - Table with status, customer, network, amount, date.

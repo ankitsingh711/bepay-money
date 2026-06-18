@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "bepay — Merchant",
   description:
     "bepay merchant dashboard — create payment links, monitor incoming crypto payments, and review transaction activity.",
+  icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
 export default function RootLayout({

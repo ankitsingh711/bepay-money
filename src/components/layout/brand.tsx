@@ -1,57 +1,32 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-/** Pixel-tile bepay glyph (approximation of the logo mark). */
-function Glyph({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "grid size-8 grid-cols-3 grid-rows-3 gap-[2px] rounded-md bg-white/10 p-1",
-        className,
-      )}
-      aria-hidden
-    >
-      {[1, 1, 0, 1, 0, 1, 0, 1, 1].map((on, i) => (
-        <span
-          key={i}
-          className={cn("rounded-[1px]", on ? "bg-white" : "bg-transparent")}
-        />
-      ))}
-    </span>
-  );
-}
-
-/** bepay wordmark with the tile glyph. */
+/**
+ * bepay logo lockup. Uses the official logo asset (public/logo.png), which
+ * already contains the glyph + "bepay business" wordmark.
+ */
 export function Brand({
   className,
-  variant = "light",
   compact = false,
 }: {
   className?: string;
-  variant?: "light" | "dark";
+  /** show only the glyph portion (collapsed sidebar / tight spaces) */
   compact?: boolean;
+  /** kept for API compatibility with prior callers */
+  variant?: "light" | "dark";
 }) {
-  if (compact) {
-    return <Glyph />;
-  }
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <Glyph className={variant === "dark" ? "bg-foreground/10" : undefined} />
-      <span
-        className={cn(
-          "text-[13px] font-semibold tracking-tight",
-          variant === "light" ? "text-white" : "text-foreground",
-        )}
-      >
-        bepay{" "}
-        <span
-          className={cn(
-            "text-[11px] font-normal",
-            variant === "light" ? "text-white/55" : "text-muted-foreground",
-          )}
-        >
-          business
-        </span>
-      </span>
-    </div>
+    <Image
+      src="/logo.png"
+      alt="bepay business"
+      width={71}
+      height={71}
+      priority
+      className={cn(
+        "select-none object-contain",
+        compact ? "size-9" : "size-14",
+        className,
+      )}
+    />
   );
 }

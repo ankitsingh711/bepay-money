@@ -30,12 +30,11 @@ export function PremiumCard() {
         </svg>
       </div>
 
-      <div className="relative mt-8 flex items-center justify-center">
-        <Brand compact />
-        <span className="ml-2 text-2xl font-semibold tracking-tight">bepay</span>
+      <div className="relative mt-6 flex items-center justify-center">
+        <Brand className="size-16" />
       </div>
 
-      <div className="relative mt-6 flex items-end justify-end">
+      <div className="relative mt-4 flex items-end justify-end">
         <span className="text-xs font-medium text-white/70">Premium Card</span>
       </div>
     </div>
