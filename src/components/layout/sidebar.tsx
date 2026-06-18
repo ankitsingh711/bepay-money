@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import { toast } from "sonner";
 import { Brand } from "./brand";
 import { NAV_ITEMS } from "./nav-config";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 
 function isActive(pathname: string, item: (typeof NAV_ITEMS)[number]) {
@@ -14,6 +16,15 @@ function isActive(pathname: string, item: (typeof NAV_ITEMS)[number]) {
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { signOut } = useAuth();
+
+  function handleLogout() {
+    signOut();
+    onNavigate?.();
+    toast.success("Logged out");
+    router.replace("/login");
+  }
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -48,6 +59,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t border-white/10 p-3">
         <button
           type="button"
+          onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white"
         >
           <LogOut className="size-[18px]" />

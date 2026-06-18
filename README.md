@@ -1,36 +1,173 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# bepay — Merchant App
 
-## Getting Started
+A responsive merchant payment experience for **bepay**, a non-custodial crypto payments super app. Merchants can review payment metrics, search and inspect transactions, create payment links, and manage payment-link detail pages.
 
-First, run the development server:
+Built as a take-home assignment. No real blockchain, wallet, or settlement functionality — all payment data is mocked and the app is designed as though it integrates with a real backend API.
+
+---
+
+## Tech stack
+
+| Concern | Choice | Why |
+|---|---|---|
+| Framework | **Next.js 16 (App Router) + React 19** | File-based routing, RSC-ready, great DX, easy deploy |
+| Language | **TypeScript** (strict) | Type-safe domain model end-to-end |
+| Styling | **Tailwind CSS v4** | Design tokens via `@theme`, fast iteration, matches the Figma system |
+| Components | **Hand-built kit on Radix UI primitives** | Accessible dialogs/drawers/selects/switches without inheriting an off-brand look |
+| Data fetching | **TanStack Query** | Caching, loading/error states, request dedupe, `placeholderData` for smooth pagination |
+| Forms | **React Hook Form + Zod** | Declarative validation, minimal re-renders, schema reused for types |
+| Mock API | **MSW (Mock Service Worker)** | Intercepts real `fetch` calls — closest thing to a real backend |
+| Money | **BigInt minor-units utility** | No floating-point errors in currency math |
+| Misc | `qrcode.react`, `sonner` (toasts), `date-fns`, `lucide-react` | QR codes, feedback, dates, icons |
+| Testing | **Vitest + Testing Library** | Fast unit/component tests |
+
+---
+
+## Getting started
+
+**Prerequisites:** Node ≥ 18 and [pnpm](https://pnpm.io) (or npm).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open **http://localhost:3000**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> On first load the app waits briefly while the MSW service worker registers, then all data is served by the in-browser mock API.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Scripts
 
-## Learn More
+```bash
+pnpm dev         # start dev server
+pnpm build       # production build
+pnpm start       # serve the production build
+pnpm test        # run unit/component tests once
+pnpm test:watch  # watch mode
+pnpm lint        # eslint
+pnpm typecheck   # tsc --noEmit
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/
+    (app)/                     # authenticated shell (sidebar + topbar)
+      page.tsx                 # Dashboard
+      payments/                # Payment history + transaction detail page
+      payment-links/           # List, /new (create), /[id] (detail)
+      settings/                # stub
+    layout.tsx, providers.tsx  # fonts, MSW bootstrap, React Query, toasts
+  components/
+    ui/                        # design-system primitives (button, card, dialog, sheet, table…)
+    layout/                    # sidebar, topbar, app shell, brand, nav config
+    dashboard/ payments/ payment-links/ charts/ common/   # feature components
+  hooks/                       # React Query hooks + query keys, useDebounce
+  lib/
+    api/                       # client (fetch wrapper) + services (one fn per endpoint)
+    mocks/                     # MSW handlers + in-memory store + seed data
+    types.ts money.ts format.ts validation.ts csv.ts utils.ts
+  test/                        # vitest setup
+```
 
-## Deploy on Vercel
+### Data flow / separation of concerns
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+Component → React Query hook → service fn → fetch (apiClient) → MSW handler → in-memory store
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Components never call `fetch` or build URLs.** They use hooks (`useTransactions`, `useCreatePaymentLink`, …).
+- **Services** (`lib/api/services.ts`) are the single typed interface to the backend — one function per endpoint in the suggested contract. Swapping MSW for a real API means changing only the base URL / handlers; the rest of the app is untouched.
+- **The mock store** (`lib/mocks/store.ts`) owns all filter/search/paginate/create logic, keeping handlers thin and realistic.
+
+### Mocked API (matches the suggested contract)
+
+| Method | Endpoint | Notes |
+|---|---|---|
+| GET | `/api/dashboard/summary` | totals, deltas, recent transactions |
+| GET | `/api/transactions` | `status`, `search`, `network`, `from`, `to`, `page`, `limit` |
+| GET | `/api/transactions/:id` | 404 when missing |
+| GET | `/api/payment-links` | `status`, `search`, `page`, `limit` |
+| POST | `/api/payment-links` | validates, returns the created link (201) |
+| GET | `/api/payment-links/:id` | includes the associated transaction once paid |
+
+All handlers add artificial latency so loading states are visible; error responses are returned for missing resources so error states are exercised.
+
+### Money handling
+
+Currency amounts are stored as **decimal strings** and all arithmetic goes through **BigInt minor units** (`lib/money.ts`) — `0.1 + 0.2` is exactly `0.30`, never `0.30000000000000004`. Display precision is per-token (stablecoins 2dp, ETH 4dp). See `money.test.ts`.
+
+---
+
+## Features implemented
+
+### A. Dashboard
+- Four summary metric cards (total received, successful, pending, failed/expired) with period-over-period deltas.
+- Turnover bar chart + holdings donut (dependency-free SVG).
+- Recent transactions with row → detail drawer.
+- Controls: **period filter**, **refresh** (with spinner), and **Create payment link** CTA.
+
+### B. Payment history
+- Table with status, customer, network, amount, date.
+- **Search** (debounced) by ID / title / reference; **status** segmented filter; **advanced filters** drawer (network + date range, server-side).
+- **Pagination** with page metadata ("Showing 1–10 of 43").
+- **Transaction detail** as a drawer on the list **and** a deep-linkable page (`/payments/:id`).
+- **CSV / JSON export** of the filtered set (optional enhancement).
+
+### C. Create payment link
+- Validated form (title, amount, token, network, optional description, expiry, optional reference) with inline errors.
+- On success: generated **payment URL**, **QR code**, amount/token/network, expiry, status, **copy** action, and "view details / create another".
+
+### D. Payment-link detail
+- Title + status, amount/token/network, created & expiry, payment URL + copy, QR.
+- Distinct **active / paid / expired** state presentation.
+- **Associated transaction** card (links to the transaction) once a payment exists.
+
+### Cross-cutting
+- Loading **skeletons**, **empty** states, **error** states with retry, validation feedback, toasts.
+- **Responsive** (desktop sidebar → mobile drawer nav; tables scroll horizontally on small screens).
+- **Accessibility**: semantic landmarks, labelled controls, keyboard-operable rows (Enter/Space), focus rings, `aria-current`, Radix focus trapping in dialogs/drawers.
+
+---
+
+## Prioritisation, assumptions & trade-offs
+
+**What I prioritised first and why**
+1. **Data/state architecture** (types, money util, service layer, MSW, React Query) before any UI — it's the backbone and the rubric weights it heavily.
+2. The **four required flows** end-to-end (dashboard → payments → create link → link detail) over breadth.
+3. **States** (loading/empty/error/validation) throughout, since "feel coherent" matters more than extra screens.
+
+**Assumptions (design was provided as zoomed-out Figma boards)**
+- The merchant app is the in-scope surface; onboarding/login/wallet/swap/withdraw flows in the file are out of scope for this assignment.
+- Exact hex values and some copy weren't legible at the provided zoom, so design **tokens** were extracted to match the system (dark sidebar, light canvas, white cards, black pill buttons, green/amber/red/slate status colours) and are centralised in `globals.css` — trivially tunable to pixel-match a high-res frame.
+- Dashboard headline totals are shown in a single display currency (USDC) for the demo; a real API would FX-convert per token.
+
+**Intentionally simplified / excluded**
+- Charts are lightweight hand-rolled SVG (no charting library) to keep the bundle small and the look on-brand.
+- Settings is a stub. Auth is not implemented (the shell assumes a signed-in merchant).
+- Component kit covers what the app needs rather than a full design system.
+
+**What I'd do next for production**
+- Real API + auth (the service layer is already the seam for this).
+- URL-synced filters/pagination (shareable, back-button friendly).
+- Optimistic create + server-driven sorting; virtualised tables for large datasets.
+- E2E tests (Playwright), Storybook for the UI kit, and i18n/number-locale formatting.
+
+---
+
+## Testing
+
+```bash
+pnpm test
+```
+
+24 tests covering the highest-risk logic:
+- **`money`** — minor-unit conversion, round-tripping, float-drift safety, formatting/precision.
+- **`validation`** — the create-payment-link Zod schema (amounts, expiry-in-future, enums).
+- **`mocks/store`** — pagination metadata, status filter, search, page clamping, link creation, summary coherence.
+- **`StatusBadge`** — status → label mapping (component render test).
+
+`pnpm typecheck`, `pnpm lint`, and `pnpm build` all pass clean.
