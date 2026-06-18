@@ -15,6 +15,7 @@ import {
   getPaymentLink,
   getTransaction,
   getTransactionForLink,
+  getWallet,
   listPaymentLinks,
   listTransactions,
 } from "./store";
@@ -34,6 +35,11 @@ export const handlers = [
   http.get("/api/dashboard/summary", async () => {
     await delay();
     return HttpResponse.json(getDashboardSummary());
+  }),
+
+  http.get("/api/wallet", async () => {
+    await delay();
+    return HttpResponse.json(getWallet());
   }),
 
   http.get("/api/transactions", async ({ request }) => {

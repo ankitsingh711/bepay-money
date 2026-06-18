@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { StepProgress } from "@/components/auth/step-progress";
-import { getDraft, updateDraft } from "@/lib/onboarding";
+import { updateDraft } from "@/lib/onboarding";
+import { useDraft } from "@/hooks/use-onboarding";
 
 export default function BusinessAccountPage() {
   const router = useRouter();
@@ -19,11 +20,7 @@ export default function BusinessAccountPage() {
     referral: "",
   });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-
-  React.useEffect(() => {
-    const draft = getDraft();
-    if (draft.email) setValues((v) => ({ ...v, email: draft.email! }));
-  }, []);
+  const draftEmail = useDraft().email;
 
   function set(key: keyof typeof values, value: string) {
     setValues((v) => ({ ...v, [key]: value }));
@@ -37,7 +34,8 @@ export default function BusinessAccountPage() {
     if (values.license.trim().length < 2)
       next.license = "Business license is required";
     if (values.phone.trim().length < 6) next.phone = "Enter a valid phone number";
-    if (!/^\S+@\S+\.\S+$/.test(values.email)) next.email = "Enter a valid email";
+    const email = values.email || draftEmail || "";
+    if (!/^\S+@\S+\.\S+$/.test(email)) next.email = "Enter a valid email";
     setErrors(next);
     if (Object.keys(next).length) return;
 
@@ -101,7 +99,7 @@ export default function BusinessAccountPage() {
             id="bemail"
             type="email"
             placeholder="you@business.com"
-            value={values.email}
+            value={values.email || draftEmail || ""}
             invalid={!!errors.email}
             onChange={(e) => set("email", e.target.value)}
           />

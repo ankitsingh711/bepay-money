@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Bell, Menu, Search, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -11,10 +12,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SidebarNav } from "./sidebar";
+import { WithdrawDialog } from "@/components/wallet/withdraw-dialog";
 
 export function Topbar({ title }: { title: string }) {
   const [sandbox, setSandbox] = React.useState(true);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [withdrawOpen, setWithdrawOpen] = React.useState(false);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md sm:px-6">
@@ -68,16 +71,23 @@ export function Topbar({ title }: { title: string }) {
           <span className="absolute right-2.5 top-2.5 size-1.5 rounded-full bg-danger" />
         </Button>
 
-        <Button className="hidden sm:inline-flex" size="sm">
+        <Button
+          className="hidden sm:inline-flex"
+          size="sm"
+          onClick={() => setWithdrawOpen(true)}
+        >
           <Wallet />
           Withdraw
         </Button>
 
-        <div
-          className="size-9 shrink-0 rounded-full bg-gradient-to-br from-chart-3 to-chart-1"
-          aria-hidden
+        <Link
+          href="/settings/profile"
+          aria-label="Account settings"
+          className="size-9 shrink-0 rounded-full bg-gradient-to-br from-chart-3 to-chart-1 ring-offset-2 ring-offset-background transition-shadow hover:ring-2 hover:ring-ring"
         />
       </div>
+
+      <WithdrawDialog open={withdrawOpen} onOpenChange={setWithdrawOpen} />
     </header>
   );
 }

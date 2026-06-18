@@ -12,6 +12,7 @@ import {
   dashboardService,
   paymentLinksService,
   transactionsService,
+  walletService,
 } from "@/lib/api/services";
 import type {
   CreatePaymentLinkInput,
@@ -25,12 +26,20 @@ export const queryKeys = {
   transaction: (id: string) => ["transaction", id] as const,
   paymentLinks: (q: PaymentLinkQuery) => ["payment-links", q] as const,
   paymentLink: (id: string) => ["payment-link", id] as const,
+  wallet: ["wallet"] as const,
 };
 
 export function useDashboardSummary() {
   return useQuery({
     queryKey: queryKeys.dashboard,
     queryFn: () => dashboardService.getSummary(),
+  });
+}
+
+export function useWallet() {
+  return useQuery({
+    queryKey: queryKeys.wallet,
+    queryFn: () => walletService.get(),
   });
 }
 

@@ -56,13 +56,13 @@ export function OnboardingCarousel() {
             {slide.body}
           </p>
         </div>
-        <div className="flex gap-1.5" role="tablist" aria-label="Onboarding slides">
+        <div className="flex gap-1.5" aria-label="Onboarding slides">
           {SLIDES.map((_, i) => (
             <button
               key={i}
               type="button"
               aria-label={`Go to slide ${i + 1}`}
-              aria-selected={i === index}
+              aria-current={i === index}
               onClick={() => setIndex(i)}
               className={cn(
                 "h-1.5 rounded-full transition-all",

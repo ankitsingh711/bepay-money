@@ -24,6 +24,7 @@ import {
   MetricCardSkeleton,
 } from "@/components/dashboard/metric-card";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { WalletCard } from "@/components/wallet/wallet-card";
 import { BarChart } from "@/components/charts/bar-chart";
 import { DonutChart } from "@/components/charts/donut-chart";
 import { useDashboardSummary } from "@/hooks/queries";
@@ -135,8 +136,9 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* charts */}
+          {/* wallet + turnover */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <WalletCard />
             <Card className="lg:col-span-2">
               <CardHeader className="flex-row items-start justify-between">
                 <div>
@@ -152,7 +154,10 @@ export default function DashboardPage() {
                 <BarChart data={TURNOVER} highlightIndex={4} />
               </CardContent>
             </Card>
+          </div>
 
+          {/* holdings + recent transactions */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <Card>
               <CardHeader>
                 <CardTitle>Holding tokens</CardTitle>
@@ -186,13 +191,15 @@ export default function DashboardPage() {
                 </ul>
               </CardContent>
             </Card>
-          </div>
 
-          {/* recent transactions */}
-          <RecentTransactions
-            transactions={data?.recentTransactions}
-            isLoading={isLoading}
-          />
+            {/* recent transactions */}
+            <div className="lg:col-span-2">
+              <RecentTransactions
+                transactions={data?.recentTransactions}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
         </>
       )}
     </div>

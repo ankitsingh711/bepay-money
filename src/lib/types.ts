@@ -60,6 +60,21 @@ export interface DashboardSummary {
   recentTransactions: Transaction[];
 }
 
+export interface WalletHolding {
+  token: Token;
+  amount: string;
+  /** Display-currency value of the holding, decimal string. */
+  fiatValue: string;
+}
+
+export interface Wallet {
+  address: string;
+  /** Total balance in display currency, decimal string. */
+  balance: string;
+  currency: Token;
+  holdings: WalletHolding[];
+}
+
 export interface Paginated<T> {
   data: T[];
   page: number;

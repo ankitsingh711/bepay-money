@@ -9,6 +9,7 @@ import type {
   PaymentLinkQuery,
   Transaction,
   TransactionQuery,
+  Wallet,
 } from "@/lib/types";
 import { apiClient, buildQuery } from "./client";
 
@@ -19,6 +20,10 @@ export type PaymentLinkDetail = PaymentLink & {
 
 export const dashboardService = {
   getSummary: () => apiClient.get<DashboardSummary>("/api/dashboard/summary"),
+};
+
+export const walletService = {
+  get: () => apiClient.get<Wallet>("/api/wallet"),
 };
 
 export const transactionsService = {

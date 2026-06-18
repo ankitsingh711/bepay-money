@@ -9,14 +9,28 @@ export interface Session {
 const KEY = "bepay.session";
 const EVENT = "bepay:auth-change";
 
+// Cache the parsed session keyed by the raw string so getSession() returns a
+// stable reference between reads — required for useSyncExternalStore.
+let cachedRaw: string | null = null;
+let cachedSession: Session | null = null;
+
 export function getSession(): Session | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as Session) : null;
+    if (raw !== cachedRaw) {
+      cachedRaw = raw;
+      cachedSession = raw ? (JSON.parse(raw) as Session) : null;
+    }
+    return cachedSession;
   } catch {
     return null;
   }
+}
+
+/** Server snapshot for useSyncExternalStore (no session during SSR). */
+export function getServerSession(): Session | null {
+  return null;
 }
 
 export function signIn(session: Session) {

@@ -1,24 +1,25 @@
 "use client";
 
-import * as React from "react";
+import { useSyncExternalStore } from "react";
 import {
+  getServerSession,
   getSession,
   signIn as signInFn,
   signOut as signOutFn,
   subscribe,
-  type Session,
 } from "@/lib/auth";
 
-export function useAuth() {
-  const [session, setSession] = React.useState<Session | null>(null);
-  // `ready` flips true after the first client read, so guards don't act on SSR.
-  const [ready, setReady] = React.useState(false);
+const noopSubscribe = () => () => {};
 
-  React.useEffect(() => {
-    setSession(getSession());
-    setReady(true);
-    return subscribe(() => setSession(getSession()));
-  }, []);
+export function useAuth() {
+  const session = useSyncExternalStore(subscribe, getSession, getServerSession);
+  // `ready` is false during SSR / first paint, true once hydrated — so guards
+  // don't redirect before the client has read the persisted session.
+  const ready = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
 
   return {
     session,

@@ -126,6 +126,12 @@ Currency amounts are stored as **decimal strings** and all arithmetic goes throu
 - Distinct **active / paid / expired** state presentation.
 - **Associated transaction** card (links to the transaction) once a payment exists.
 
+### E. Authentication & onboarding (mocked — optional enhancement)
+- **Login** and a full **multi-step onboarding journey**: Create Account → verify email (OTP) → create password → create business account → registered → create shop → shop address (map placeholder) → reward / done.
+- Shared **split auth layout** (rotating onboarding carousel + form) matching the Figma.
+- **Mocked session** persisted in `localStorage` via `useSyncExternalStore`; a **route guard** redirects unauthenticated users to `/login`, "Log out" clears the session, and onboarding draft state is carried across steps in `sessionStorage`.
+- No real backend/credentials — any input works (e.g. the OTP accepts any 6 digits).
+
 ### Cross-cutting
 - Loading **skeletons**, **empty** states, **error** states with retry, validation feedback, toasts.
 - **Responsive** (desktop sidebar → mobile drawer nav; tables scroll horizontally on small screens).
@@ -147,7 +153,7 @@ Currency amounts are stored as **decimal strings** and all arithmetic goes throu
 
 **Intentionally simplified / excluded**
 - Charts are lightweight hand-rolled SVG (no charting library) to keep the bundle small and the look on-brand.
-- Settings is a stub. Auth is not implemented (the shell assumes a signed-in merchant).
+- Auth/onboarding is a fully-mocked UI shell (no real backend, credentials, or email/SMS); it persists a fake session client-side. Settings is a stub.
 - Component kit covers what the app needs rather than a full design system.
 
 **What I'd do next for production**

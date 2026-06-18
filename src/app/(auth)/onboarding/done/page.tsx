@@ -1,21 +1,16 @@
 "use client";
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Gift, Store } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth";
 import { clearDraft, getDraft } from "@/lib/onboarding";
+import { useDraft } from "@/hooks/use-onboarding";
 
 export default function OnboardingDonePage() {
   const router = useRouter();
-  const [shopName, setShopName] = React.useState("your shop");
-
-  React.useEffect(() => {
-    const draft = getDraft();
-    setShopName(draft.shopName || "your shop");
-  }, []);
+  const shopName = useDraft().shopName || "your shop";
 
   function enterApp() {
     const draft = getDraft();

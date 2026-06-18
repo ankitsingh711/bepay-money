@@ -6,17 +6,13 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { OtpInput } from "@/components/ui/otp-input";
-import { getDraft } from "@/lib/onboarding";
+import { useDraft } from "@/hooks/use-onboarding";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
   const [code, setCode] = React.useState("");
-  const [email, setEmail] = React.useState("your email");
+  const email = useDraft().email || "your email";
   const [seconds, setSeconds] = React.useState(30);
-
-  React.useEffect(() => {
-    setEmail(getDraft().email || "your email");
-  }, []);
 
   React.useEffect(() => {
     if (seconds <= 0) return;

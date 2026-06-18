@@ -11,6 +11,7 @@ import type {
   PaymentLinkQuery,
   Transaction,
   TransactionQuery,
+  Wallet,
 } from "@/lib/types";
 import { buildSeed } from "./data";
 
@@ -145,4 +146,20 @@ export function getDashboardSummary(): DashboardSummary {
     },
     recentTransactions: state.transactions.slice(0, 6),
   };
+}
+
+const wallet: Wallet = {
+  address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+  balance: "653877.09",
+  currency: "USDC",
+  holdings: [
+    { token: "USDC", amount: "300783.46", fiatValue: "300783.46" },
+    { token: "ETH", amount: "61.4820", fiatValue: "183092.18" },
+    { token: "USDT", amount: "104620.10", fiatValue: "104620.10" },
+    { token: "DAI", amount: "65381.35", fiatValue: "65381.35" },
+  ],
+};
+
+export function getWallet(): Wallet {
+  return wallet;
 }
