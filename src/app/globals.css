@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
+/*
+  bepay merchant — design tokens
+  Extracted from the Figma board: dark sidebar, light-grey canvas, white cards,
+  black pill buttons, and green/amber/red/slate status colors.
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f5f7; /* app canvas */
+  --foreground: #0b0e14; /* primary text / near-black */
+  --card: #ffffff;
+  --card-foreground: #0b0e14;
+  --popover: #ffffff;
+  --popover-foreground: #0b0e14;
+
+  --primary: #0b0e14; /* black pill buttons */
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f5;
+  --secondary-foreground: #0b0e14;
+
+  --muted: #f1f3f5;
+  --muted-foreground: #6b7280;
+  --accent: #f1f3f5;
+  --accent-foreground: #0b0e14;
+
+  --border: #e8eaed;
+  --input: #e8eaed;
+  --ring: #0b0e14;
+
+  /* sidebar (dark) */
+  --sidebar: #0b0e14;
+  --sidebar-foreground: #c8ccd4;
+  --sidebar-active: #ffffff;
+  --sidebar-active-bg: rgba(255, 255, 255, 0.08);
+
+  /* status palette */
+  --success: #16a34a;
+  --success-bg: #dcfce7;
+  --success-fg: #15803d;
+  --warning: #d97706;
+  --warning-bg: #fef3c7;
+  --warning-fg: #b45309;
+  --danger: #dc2626;
+  --danger-bg: #fee2e2;
+  --danger-fg: #b91c1c;
+  --neutral-bg: #eef1f4;
+  --neutral-fg: #475569;
+
+  /* chart palette */
+  --chart-1: #0b0e14;
+  --chart-2: #16a34a;
+  --chart-3: #6366f1;
+  --chart-4: #f59e0b;
+  --chart-5: #06b6d4;
+
+  --radius: 0.875rem;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-active-bg: var(--sidebar-active-bg);
+
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-fg: var(--success-fg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-fg: var(--danger-fg);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-fg: var(--neutral-fg);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Thin, unobtrusive scrollbars to match the clean design */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6dadf;
+  border-radius: 9999px;
+  border: 3px solid var(--background);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c2c7cd;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
