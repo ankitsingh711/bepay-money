@@ -20,6 +20,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const title = deriveTitle(pathname);
   const [collapsed, setCollapsed] = React.useState(false);
+  // Settings owns its own surface (dark sub-nav + white content), so render it
+  // edge-to-edge inside the rounded panel.
+  const fullBleed = pathname.startsWith("/settings");
 
   return (
     <div className="flex min-h-screen bg-sidebar">
@@ -51,7 +54,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* white content panel */}
         <main className="flex-1 px-2 pb-2 sm:px-3 sm:pb-3">
-          <div className="min-h-[calc(100vh-5rem)] rounded-3xl bg-card px-4 py-6 sm:px-6 lg:px-8">
+          <div
+            className={cn(
+              "min-h-[calc(100vh-5rem)] overflow-hidden rounded-3xl bg-card",
+              !fullBleed && "px-4 py-6 sm:px-6 lg:px-8",
+            )}
+          >
             {children}
           </div>
         </main>

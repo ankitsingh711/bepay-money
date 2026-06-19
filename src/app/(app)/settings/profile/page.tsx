@@ -1,271 +1,130 @@
 "use client";
 
 import * as React from "react";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { OtpInput } from "@/components/ui/otp-input";
-import { useAuth } from "@/hooks/use-auth";
+import { ChevronDown, Pencil } from "lucide-react";
+import { ProfileAvatar } from "@/components/profile/avatars";
+import { AvatarEditor, type Avatar } from "@/components/profile/avatar-editor";
+import { ChangePhoneDialog } from "@/components/profile/change-phone";
 import { cn } from "@/lib/utils";
 
-const AVATARS = [
-  "from-chart-3 to-chart-1",
-  "from-chart-2 to-chart-5",
-  "from-chart-4 to-danger",
-  "from-chart-5 to-chart-3",
-  "from-success to-chart-2",
-  "from-danger to-chart-4",
-  "from-chart-1 to-chart-3",
-  "from-warning to-chart-4",
-];
+function ReadField({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <div className="flex h-14 items-center rounded-2xl bg-muted/50 px-4 text-[15px]">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
-  const { session } = useAuth();
-  const [avatar, setAvatar] = React.useState(0);
+  const [avatar, setAvatar] = React.useState<Avatar>({ kind: "none" });
   const [avatarOpen, setAvatarOpen] = React.useState(false);
   const [phoneOpen, setPhoneOpen] = React.useState(false);
-  const [name, setName] = React.useState("Anshi Kohli");
-  const [phone, setPhone] = React.useState("+1 555 0142");
-  const [saving, setSaving] = React.useState(false);
-
-  function save(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      toast.success("Profile updated");
-    }, 700);
-  }
+  const [phone, setPhone] = React.useState("9834576821");
 
   return (
-    <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Basic info</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* avatar */}
-          <div className="flex items-center gap-4">
-            <div
-              className={cn(
-                "flex size-16 items-center justify-center rounded-full bg-gradient-to-br text-xl font-semibold text-white",
-                AVATARS[avatar],
-              )}
-            >
-              {name.charAt(0)}
-            </div>
-            <div>
-              <p className="font-medium">{name}</p>
-              <p className="text-sm text-muted-foreground">
-                {session?.email ?? "merchant@bepay.app"}
-              </p>
+    <div className="mx-auto max-w-4xl">
+      {/* header */}
+      <div className="flex items-start gap-5">
+        <div className="relative">
+          <div className="size-24 overflow-hidden rounded-3xl bg-muted">
+            {avatar.kind === "illustration" ? (
+              <div className="size-full bg-white">
+                <ProfileAvatar index={avatar.index} />
+              </div>
+            ) : avatar.kind === "photo" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatar.url}
+                alt="Profile"
+                className="size-full object-cover"
+              />
+            ) : (
+              <div className="flex size-full items-center justify-center bg-gradient-to-br from-chart-3 to-chart-1 text-3xl font-semibold text-white">
+                D
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setAvatarOpen(true)}
+            aria-label="Edit profile photo"
+            className="absolute -bottom-2 left-1/2 flex size-9 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-colors hover:bg-muted"
+          >
+            <Pencil className="size-4" />
+          </button>
+        </div>
+
+        <div className="pt-2">
+          <h2 className="text-2xl font-bold tracking-tight">Drake</h2>
+          <p className="text-muted-foreground">Drake_feild@gmail.com</p>
+        </div>
+      </div>
+
+      {/* basic info */}
+      <div className="mt-10">
+        <h3 className="text-2xl font-bold tracking-tight">Basic info</h3>
+        <p className="mt-1 text-muted-foreground">
+          This information has been provided by you, while setting up your
+          business
+        </p>
+
+        <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+          <ReadField label="Business Name">XYZ Shop</ReadField>
+          <ReadField label="Email/phone number">arukshdggy@gmail.com</ReadField>
+
+          <div className="space-y-2 md:col-span-2 md:max-w-[calc(50%-1rem)]">
+            <p className="text-sm text-muted-foreground">Phone Number</p>
+            <div className="flex gap-2">
+              <span className="flex h-14 items-center gap-1.5 rounded-2xl bg-muted/50 px-3 text-[15px] font-medium">
+                <span aria-hidden>🇮🇳</span> +91
+                <ChevronDown className="size-4 text-muted-foreground" />
+              </span>
               <button
                 type="button"
-                onClick={() => setAvatarOpen(true)}
-                className="mt-1 text-sm font-medium text-foreground hover:underline"
+                onClick={() => setPhoneOpen(true)}
+                className="flex h-14 flex-1 items-center justify-between rounded-2xl bg-muted/50 px-4 text-left text-[15px] transition-colors hover:bg-muted"
               >
-                Change avatar
+                {phone}
+                <Pencil className="size-4 text-muted-foreground" />
               </button>
             </div>
           </div>
+        </div>
 
-          <form onSubmit={save} className="space-y-4">
-            <Field label="Full name" htmlFor="name">
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </Field>
-            <Field label="Email" htmlFor="email" hint="Email can’t be changed">
-              <Input
-                id="email"
-                value={session?.email ?? "merchant@bepay.app"}
-                readOnly
-                className="bg-muted/40"
-              />
-            </Field>
-            <Field label="Business name" htmlFor="business">
-              <Input
-                id="business"
-                defaultValue={session?.businessName ?? "Acme Store"}
-              />
-            </Field>
-            <Button type="submit" disabled={saving}>
-              {saving && <Loader2 className="animate-spin" />}
-              {saving ? "Saving…" : "Save changes"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <hr className="my-8 border-border" />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Phone number</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-between">
-          <div>
-            <p className="font-medium">{phone}</p>
-            <p className="text-sm text-muted-foreground">
-              Used for sign-in and withdrawal verification.
-            </p>
-          </div>
-          <Button variant="outline" onClick={() => setPhoneOpen(true)}>
-            Change
-          </Button>
-        </CardContent>
-      </Card>
+        <div className="grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
+          <ReadField label="My referrer">
+            <span className="text-muted-foreground">
+              bepay ID:&nbsp;<span className="font-semibold text-foreground">20416729</span>
+            </span>
+          </ReadField>
+          <ReadField label="Referrer’s referral code">TEEFZR</ReadField>
+        </div>
+      </div>
 
-      <AvatarDialog
+      <AvatarEditor
         open={avatarOpen}
         onOpenChange={setAvatarOpen}
-        avatars={AVATARS}
-        selected={avatar}
-        onSelect={(i) => {
-          setAvatar(i);
-          setAvatarOpen(false);
-          toast.success("Avatar updated");
-        }}
+        onApply={setAvatar}
       />
-
       <ChangePhoneDialog
         open={phoneOpen}
         onOpenChange={setPhoneOpen}
-        onChanged={(p) => {
-          setPhone(p);
-          toast.success("Phone number changed");
-        }}
+        current={phone}
+        onChanged={setPhone}
       />
-    </>
-  );
-}
-
-function AvatarDialog({
-  open,
-  onOpenChange,
-  avatars,
-  selected,
-  onSelect,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  avatars: string[];
-  selected: number;
-  onSelect: (i: number) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Select an avatar</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-4 gap-3">
-          {avatars.map((a, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onSelect(i)}
-              className={cn(
-                "aspect-square rounded-full bg-gradient-to-br ring-offset-2 ring-offset-card transition-shadow",
-                a,
-                i === selected && "ring-2 ring-ring",
-              )}
-              aria-label={`Avatar ${i + 1}`}
-            />
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function ChangePhoneDialog({
-  open,
-  onOpenChange,
-  onChanged,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-  onChanged: (phone: string) => void;
-}) {
-  const [step, setStep] = React.useState<"phone" | "otp">("phone");
-  const [phone, setPhone] = React.useState("");
-  const [code, setCode] = React.useState("");
-  const [error, setError] = React.useState<string>();
-
-  function close(o: boolean) {
-    onOpenChange(o);
-    if (!o)
-      setTimeout(() => {
-        setStep("phone");
-        setPhone("");
-        setCode("");
-        setError(undefined);
-      }, 200);
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={close}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Change phone number</DialogTitle>
-        </DialogHeader>
-        {step === "phone" ? (
-          <form
-            className="space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (phone.trim().length < 6) {
-                setError("Enter a valid phone number");
-                return;
-              }
-              setStep("otp");
-            }}
-          >
-            <Field label="New phone number" htmlFor="newphone" error={error}>
-              <Input
-                id="newphone"
-                placeholder="+1 555 0199"
-                value={phone}
-                invalid={!!error}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </Field>
-            <Button type="submit" className="w-full">
-              Send code
-            </Button>
-          </form>
-        ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Enter the 6-digit code sent to {phone}. (Demo: any 6 digits.)
-            </p>
-            <OtpInput value={code} onChange={setCode} />
-            <Button
-              className="w-full"
-              onClick={() => {
-                if (code.length < 6) {
-                  toast.error("Enter the 6-digit code");
-                  return;
-                }
-                onChanged(phone);
-                close(false);
-              }}
-            >
-              Verify & update
-            </Button>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+    </div>
   );
 }
