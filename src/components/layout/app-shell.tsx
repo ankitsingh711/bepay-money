@@ -13,6 +13,7 @@ function deriveTitle(pathname: string): string {
   if (pathname.startsWith("/payment-links")) return "Payment Links";
   if (pathname.startsWith("/payments")) return "Payment History";
   if (pathname.startsWith("/settings")) return "Settings";
+  if (pathname.startsWith("/wallet")) return "Dashboard";
   return "bepay";
 }
 
@@ -22,7 +23,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = React.useState(false);
   // Settings owns its own surface (dark sub-nav + white content), so render it
   // edge-to-edge inside the rounded panel.
-  const fullBleed = pathname.startsWith("/settings");
+  const fullBleed =
+    pathname.startsWith("/settings") || pathname.startsWith("/wallet");
 
   return (
     <div className="flex min-h-screen bg-sidebar">

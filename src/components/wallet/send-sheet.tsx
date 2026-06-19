@@ -138,6 +138,14 @@ export function SendSheet({
   const [discardOpen, setDiscardOpen] = React.useState(false);
 
   const dirty = Boolean(asset || address || amount);
+  // A nested centered dialog is open — its overlay must not be treated as an
+  // "interact outside" that closes the slide-over.
+  const childOpen =
+    confirmSend ||
+    security !== null ||
+    deleteTarget !== null ||
+    inviteTarget !== null ||
+    discardOpen;
   const fee = "0.00005";
   const canSend =
     !!asset && address.trim().length > 4 && Number(amount) > 0;
@@ -205,11 +213,11 @@ export function SendSheet({
           <DialogPrimitive.Content
             onInteractOutside={(e) => {
               e.preventDefault();
-              requestClose();
+              if (!childOpen) requestClose();
             }}
             onEscapeKeyDown={(e) => {
               e.preventDefault();
-              requestClose();
+              if (!childOpen) requestClose();
             }}
             className="fixed inset-y-0 right-0 z-40 flex h-full w-full max-w-md flex-col rounded-l-[2rem] bg-card shadow-2xl data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:animate-in data-[state=open]:slide-in-from-right"
           >

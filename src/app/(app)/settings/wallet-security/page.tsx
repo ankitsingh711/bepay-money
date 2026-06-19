@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CopyButton } from "@/components/common/copy-button";
+import { CreateWalletIntro } from "@/components/wallet/create-wallet-intro";
 import { cn } from "@/lib/utils";
 
 const WORDS = [
@@ -155,7 +156,7 @@ export default function WalletSecurityPage() {
       <PhraseDialog open={phraseOpen} onOpenChange={setPhraseOpen} />
       <PrivateKeysDialog open={keysOpen} onOpenChange={setKeysOpen} />
       <DeleteWalletDialog open={deleteOpen} onOpenChange={setDeleteOpen} />
-      <AddNetworkDialog open={networkOpen} onOpenChange={setNetworkOpen} />
+      <CreateWalletIntro open={networkOpen} onOpenChange={setNetworkOpen} />
     </div>
   );
 }
@@ -306,46 +307,6 @@ function DeleteWalletDialog({
             Delete
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-const NETWORKS = ["Polygon", "Ethereum", "Base", "Arbitrum", "Optimism"];
-
-function AddNetworkDialog({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (o: boolean) => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add a network</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Choose a network to enable for this wallet.
-          </p>
-        </DialogHeader>
-        <ul className="space-y-2">
-          {NETWORKS.map((n) => (
-            <li key={n}>
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenChange(false);
-                  toast.success(`${n} network added`);
-                }}
-                className="flex w-full items-center justify-between rounded-xl border border-border p-3 text-left text-sm font-medium transition-colors hover:bg-muted"
-              >
-                {n}
-                <Plus className="size-4 text-muted-foreground" />
-              </button>
-            </li>
-          ))}
-        </ul>
       </DialogContent>
     </Dialog>
   );
