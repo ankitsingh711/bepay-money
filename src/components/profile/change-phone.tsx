@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronDown, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,17 +10,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Field } from "@/components/ui/field";
+import { CountrySelect } from "./country-select";
+import {
+  DEFAULT_COUNTRY,
+  validatePhone,
+  type Country,
+} from "@/lib/countries";
 
 type Step = "phone" | "otp" | "success";
-
-function CountryPill() {
-  return (
-    <span className="flex h-12 items-center gap-1.5 rounded-xl bg-muted/60 px-3 text-sm font-medium">
-      <span aria-hidden>🇮🇳</span> +91
-      <ChevronDown className="size-4 text-muted-foreground" />
-    </span>
-  );
-}
 
 export function ChangePhoneDialog({
   open,
@@ -34,17 +32,23 @@ export function ChangePhoneDialog({
   onChanged: (phone: string) => void;
 }) {
   const [step, setStep] = React.useState<Step>("phone");
+  const [country, setCountry] = React.useState<Country>(DEFAULT_COUNTRY);
   const [phone, setPhone] = React.useState("");
+  const [touched, setTouched] = React.useState(false);
   const [code, setCode] = React.useState("");
   const [seconds, setSeconds] = React.useState(57);
   const [resent, setResent] = React.useState(false);
+
+  const phoneError = validatePhone(phone, country);
 
   function close(o: boolean) {
     onOpenChange(o);
     if (!o)
       setTimeout(() => {
         setStep("phone");
+        setCountry(DEFAULT_COUNTRY);
         setPhone("");
+        setTouched(false);
         setCode("");
         setSeconds(57);
         setResent(false);
@@ -68,32 +72,37 @@ export function ChangePhoneDialog({
                 Please enter your new phone number
               </p>
             </DialogHeader>
-            <div className="space-y-2">
-              <label htmlFor="newphone" className="text-sm font-medium">
-                Phone Number
-              </label>
+            <Field
+              label="Phone Number"
+              htmlFor="newphone"
+              error={touched ? phoneError ?? undefined : undefined}
+            >
               <div className="flex gap-2">
-                <CountryPill />
+                <CountrySelect value={country} onChange={setCountry} />
                 <div className="relative flex-1">
                   <Input
                     id="newphone"
                     inputMode="tel"
                     placeholder={current}
                     value={phone}
+                    invalid={touched && !!phoneError}
                     onChange={(e) =>
-                      setPhone(e.target.value.replace(/\D/g, "").slice(0, 12))
+                      setPhone(e.target.value.replace(/\D/g, "").slice(0, 14))
                     }
+                    onBlur={() => setTouched(true)}
                     className="h-12 bg-muted/60 pr-10"
                   />
                   <Pencil className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 </div>
               </div>
-            </div>
+            </Field>
             <Button
               size="lg"
               className="mt-2 w-full"
-              disabled={phone.length < 8}
+              disabled={!!phoneError}
               onClick={() => {
+                setTouched(true);
+                if (phoneError) return;
                 setStep("otp");
                 setSeconds(57);
               }}
@@ -112,7 +121,7 @@ export function ChangePhoneDialog({
               <p className="text-sm text-muted-foreground">
                 A 6 digit code has been sent to{" "}
                 <span className="font-semibold text-foreground">
-                  +91 {phone}
+                  {country.dial} {phone}
                 </span>
                 . Please enter it within the next 30 minutes.
               </p>
