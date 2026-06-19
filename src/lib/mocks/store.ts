@@ -50,6 +50,16 @@ export function listTransactions(q: TransactionQuery): Paginated<Transaction> {
         t.externalReference?.toLowerCase().includes(s),
     );
   }
+  if (q.state && q.state !== "all") {
+    items = items.filter((t) => t.paymentState === q.state);
+  }
+  if (q.outcomeCurrency && q.outcomeCurrency !== "all") {
+    items = items.filter(
+      (t) =>
+        t.received.token === q.outcomeCurrency ||
+        t.sent.token === q.outcomeCurrency,
+    );
+  }
   if (q.network && q.network !== "all") {
     items = items.filter((t) => t.network === q.network);
   }

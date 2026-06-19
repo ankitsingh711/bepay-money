@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { ArrowDownCircle, ArrowUpCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/states";
@@ -15,54 +14,44 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { StatusBadge } from "@/components/common/status-badge";
-import { StatusFilter } from "@/components/payments/status-filter";
+import { Badge } from "@/components/ui/badge";
 import {
-  AdvancedFilters,
   EMPTY_FILTERS,
   FiltersSheet,
+  type PaymentFilters,
 } from "@/components/payments/filters-sheet";
 import { ExportDialog } from "@/components/payments/export-dialog";
 import { TransactionDetailSheet } from "@/components/payments/transaction-detail-sheet";
 import { useTransactions } from "@/hooks/queries";
 import { useDebounce } from "@/hooks/use-debounce";
-import { formatMoney } from "@/lib/money";
-import { formatDateTime } from "@/lib/format";
-import { NETWORK_LABELS, type TransactionStatus } from "@/lib/types";
+import { formatDate } from "@/lib/format";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
-const LIMIT = 10;
+const LIMIT = 9;
 
 export default function PaymentsPage() {
   const [search, setSearch] = React.useState("");
-  const [status, setStatus] = React.useState<TransactionStatus | "all">("all");
-  const [filters, setFilters] = React.useState<AdvancedFilters>(EMPTY_FILTERS);
+  const [filters, setFilters] = React.useState<PaymentFilters>(EMPTY_FILTERS);
   const [page, setPage] = React.useState(1);
   const [selected, setSelected] = React.useState<string | undefined>();
   const [detailOpen, setDetailOpen] = React.useState(false);
 
   const debouncedSearch = useDebounce(search);
 
-  // Reset to the first page whenever a filter changes (handled in the change
-  // handlers below rather than an effect to avoid cascading renders).
   function handleSearch(v: string) {
     setSearch(v);
     setPage(1);
   }
-  function handleStatus(v: TransactionStatus | "all") {
-    setStatus(v);
-    setPage(1);
-  }
-  function handleFilters(v: AdvancedFilters) {
+  function handleFilters(v: PaymentFilters) {
     setFilters(v);
     setPage(1);
   }
 
   const query = {
     search: debouncedSearch || undefined,
-    status,
-    network: filters.network,
-    from: filters.from || undefined,
-    to: filters.to || undefined,
+    state: filters.state,
+    outcomeCurrency: filters.outcomeCurrency,
     page,
     limit: LIMIT,
   };
@@ -79,125 +68,158 @@ export default function PaymentsPage() {
   const showEmpty = !isLoading && !isError && rows.length === 0;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-5">
-      {/* toolbar */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Search by ID, title or reference"
-            className="h-10 rounded-full pl-9"
-            aria-label="Search transactions"
-          />
-        </div>
-        <div className="flex items-center gap-2">
+    <div className="mx-auto max-w-[1400px]">
+      {/* header */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <h2 className="text-2xl font-bold tracking-tight">Payments</h2>
+        <div className="flex items-center gap-3">
+          <div className="relative w-full sm:w-72">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Search"
+              className="h-11 rounded-xl pl-10"
+              aria-label="Search payments"
+            />
+          </div>
           <FiltersSheet value={filters} onApply={handleFilters} />
           <ExportDialog query={query} />
         </div>
       </div>
 
-      <div className="overflow-x-auto pb-1">
-        <StatusFilter value={status} onChange={handleStatus} />
-      </div>
-
-      <Card className="overflow-hidden">
+      {/* table */}
+      <div className="mt-6 overflow-hidden rounded-3xl border border-border">
         {isError ? (
           <ErrorState onRetry={() => refetch()} />
         ) : showEmpty ? (
           <EmptyState
-            title="No transactions found"
-            description="Try adjusting your search or filters to find what you’re looking for."
+            title="No payments found"
+            description="Try adjusting your search or filters."
           />
         ) : (
-          <>
-            <div className={isFetching ? "opacity-60 transition-opacity" : ""}>
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="pl-5 sm:pl-6">Transaction</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Network</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="pr-5 text-right sm:pr-6">
-                      Date
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoading
-                    ? Array.from({ length: LIMIT }).map((_, i) => (
-                        <TableRow key={i} className="hover:bg-transparent">
-                          {Array.from({ length: 6 }).map((_, j) => (
-                            <TableCell
-                              key={j}
-                              className={
-                                j === 0 ? "pl-5 sm:pl-6" : j === 5 ? "pr-5 sm:pr-6" : ""
-                              }
+          <div className={isFetching ? "opacity-60 transition-opacity" : ""}>
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="py-4 pl-6 font-normal capitalize tracking-normal text-muted-foreground">
+                    Payment ID
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Order ID
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Original Price
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Amount Recieved
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Amount Sent
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Status
+                  </TableHead>
+                  <TableHead className="font-normal capitalize tracking-normal text-muted-foreground">
+                    Created/ Last Updated Date
+                  </TableHead>
+                  <TableHead className="pr-6 font-normal capitalize tracking-normal text-muted-foreground">
+                    Created/ Last Updated Time
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: LIMIT }).map((_, i) => (
+                      <TableRow key={i} className="hover:bg-transparent">
+                        {Array.from({ length: 8 }).map((_, j) => (
+                          <TableCell
+                            key={j}
+                            className={j === 0 ? "pl-6" : j === 7 ? "pr-6" : ""}
+                          >
+                            <Skeleton className="h-5 w-full max-w-[120px]" />
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  : rows.map((t, i) => (
+                      <TableRow
+                        key={t.id}
+                        className={cn(
+                          "cursor-pointer border-0",
+                          i % 2 === 1 && "bg-muted/40",
+                        )}
+                        tabIndex={0}
+                        role="button"
+                        onClick={() => openTx(t.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            openTx(t.id);
+                          }
+                        }}
+                      >
+                        <TableCell className="py-4 pl-6 font-medium">
+                          {t.paymentId}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {t.externalReference ?? "—"}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {t.originalPrice} USD
+                        </TableCell>
+                        <TableCell>
+                          <span className="flex items-center gap-2 whitespace-nowrap">
+                            <ArrowDownCircle className="size-4 text-success-fg" />
+                            {t.received.amount} {t.received.token}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="flex items-center gap-2 whitespace-nowrap">
+                            <ArrowUpCircle className="size-4 text-danger-fg" />
+                            {t.sent.amount} {t.sent.token}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {t.paymentState === "active" ? (
+                            <Badge
+                              variant="success"
+                              className="bg-success px-3 py-1 text-[11px] font-semibold uppercase text-white"
                             >
-                              <Skeleton className="h-5 w-full max-w-[140px]" />
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    : rows.map((tx) => (
-                        <TableRow
-                          key={tx.id}
-                          className="cursor-pointer"
-                          tabIndex={0}
-                          role="button"
-                          onClick={() => openTx(tx.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              openTx(tx.id);
-                            }
-                          }}
-                        >
-                          <TableCell className="pl-5 sm:pl-6">
-                            <div className="font-medium">
-                              {tx.paymentLinkTitle ?? "Direct payment"}
-                            </div>
-                            <div className="font-mono text-xs text-muted-foreground">
-                              {tx.id}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {tx.customerReference ?? "—"}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {NETWORK_LABELS[tx.network]}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {formatMoney(tx.amount, tx.currency)}
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={tx.status} />
-                          </TableCell>
-                          <TableCell className="pr-5 text-right text-sm text-muted-foreground sm:pr-6">
-                            {formatDateTime(tx.createdAt)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                </TableBody>
-              </Table>
-            </div>
-            {data && data.total > 0 && (
-              <div className="border-t border-border">
-                <Pagination
-                  page={data.page}
-                  totalPages={data.totalPages}
-                  total={data.total}
-                  limit={data.limit}
-                  onPageChange={setPage}
-                />
-              </div>
-            )}
-          </>
+                              Active
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="danger"
+                              className="bg-danger px-3 py-1 text-[11px] font-semibold uppercase text-white"
+                            >
+                              Expired
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap text-muted-foreground">
+                          {formatDate(t.createdAt)}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap pr-6 text-muted-foreground">
+                          {format(new Date(t.createdAt), "hh:mm a")}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
-      </Card>
+      </div>
+
+      {data && data.total > 0 && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          total={data.total}
+          limit={data.limit}
+          onPageChange={setPage}
+        />
+      )}
 
       <TransactionDetailSheet
         transactionId={selected}

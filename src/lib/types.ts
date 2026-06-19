@@ -41,6 +41,18 @@ export interface Transaction {
   createdAt: string; // ISO 8601
   /** Timestamp the payment settled/confirmed, if applicable. */
   paidAt?: string; // ISO 8601
+
+  // ---- payment-history (merchant payments table) fields ----
+  /** Numeric payment id shown in the payments table, e.g. "5193732662". */
+  paymentId: string;
+  /** Quoted fiat price, decimal string in USD, e.g. "2.50". */
+  originalPrice: string;
+  /** Crypto received by the merchant. */
+  received: { amount: string; token: Token };
+  /** Crypto the customer sent. */
+  sent: { amount: string; token: Token };
+  /** Lifecycle state shown in the payments table. */
+  paymentState: "active" | "expired";
 }
 
 export interface DashboardSummary {
@@ -99,8 +111,12 @@ export interface CreatePaymentLinkInput {
 
 export interface TransactionQuery {
   status?: TransactionStatus | "all";
+  /** Payment lifecycle state (payments table filter). */
+  state?: "active" | "expired" | "all";
   search?: string;
   network?: Network | "all";
+  /** Filter by the received/sent token (Outcome currency). */
+  outcomeCurrency?: Token | "all";
   /** ISO date (yyyy-mm-dd) inclusive lower bound on createdAt. */
   from?: string;
   /** ISO date (yyyy-mm-dd) inclusive upper bound on createdAt. */

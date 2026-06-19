@@ -21,122 +21,188 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { NETWORKS, NETWORK_LABELS, type Network } from "@/lib/types";
+import { TOKENS, type Token } from "@/lib/types";
 
-export interface AdvancedFilters {
-  network: Network | "all";
-  from: string;
-  to: string;
+export interface PaymentFilters {
+  state: "all" | "active" | "expired";
+  fixedRate: string;
+  feePaidBy: string;
+  payinAddress: string;
+  payingHash: string;
+  outcomeCurrency: "all" | Token;
 }
 
-export const EMPTY_FILTERS: AdvancedFilters = {
-  network: "all",
-  from: "",
-  to: "",
+export const EMPTY_FILTERS: PaymentFilters = {
+  state: "all",
+  fixedRate: "any",
+  feePaidBy: "any",
+  payinAddress: "",
+  payingHash: "",
+  outcomeCurrency: "all",
 };
+
+export function activeFilterCount(f: PaymentFilters): number {
+  return (
+    (f.state !== "all" ? 1 : 0) +
+    (f.fixedRate !== "any" ? 1 : 0) +
+    (f.feePaidBy !== "any" ? 1 : 0) +
+    (f.payinAddress ? 1 : 0) +
+    (f.payingHash ? 1 : 0) +
+    (f.outcomeCurrency !== "all" ? 1 : 0)
+  );
+}
+
+function ChooseSelect({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="h-12 bg-muted/40">
+        <SelectValue placeholder="Choose" />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((o) => (
+          <SelectItem key={o.value} value={o.value}>
+            {o.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
 
 export function FiltersSheet({
   value,
   onApply,
 }: {
-  value: AdvancedFilters;
-  onApply: (next: AdvancedFilters) => void;
+  value: PaymentFilters;
+  onApply: (next: PaymentFilters) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [draft, setDraft] = React.useState<AdvancedFilters>(value);
+  const [draft, setDraft] = React.useState<PaymentFilters>(value);
+  const count = activeFilterCount(value);
 
-  // Sync the working draft with the applied filters whenever the sheet opens.
   function handleOpenChange(next: boolean) {
     if (next) setDraft(value);
     setOpen(next);
   }
 
-  const activeCount =
-    (value.network !== "all" ? 1 : 0) +
-    (value.from ? 1 : 0) +
-    (value.to ? 1 : 0);
+  function set<K extends keyof PaymentFilters>(
+    key: K,
+    v: PaymentFilters[K],
+  ) {
+    setDraft((d) => ({ ...d, [key]: v }));
+  }
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10">
+        <Button variant="outline" size="sm" className="relative h-11">
           <SlidersHorizontal />
           Filters
-          {activeCount > 0 && (
-            <span className="ml-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
-              {activeCount}
-            </span>
+          {count > 0 && (
+            <span className="absolute -right-1 -top-1 size-2.5 rounded-full bg-success ring-2 ring-card" />
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent>
+      <SheetContent className="max-w-md">
         <SheetHeader>
-          <SheetTitle>Apply filters</SheetTitle>
+          <SheetTitle className="text-2xl">Apply Filters</SheetTitle>
           <p className="text-sm text-muted-foreground">
-            Refine the transaction list.
+            Filter table data and save filters.
           </p>
         </SheetHeader>
         <SheetBody className="space-y-5">
-          <Field label="Network">
-            <Select
-              value={draft.network}
-              onValueChange={(v) =>
-                setDraft((d) => ({ ...d, network: v as Network | "all" }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All networks</SelectItem>
-                {NETWORKS.map((n) => (
-                  <SelectItem key={n} value={n}>
-                    {NETWORK_LABELS[n]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <Field label="Payment Status">
+            <ChooseSelect
+              value={draft.state}
+              onChange={(v) => set("state", v as PaymentFilters["state"])}
+              options={[
+                { value: "all", label: "All" },
+                { value: "active", label: "Active" },
+                { value: "expired", label: "Expired" },
+              ]}
+            />
           </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="From date">
-              <Input
-                type="date"
-                value={draft.from}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, from: e.target.value }))
-                }
-              />
-            </Field>
-            <Field label="To date">
-              <Input
-                type="date"
-                value={draft.to}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, to: e.target.value }))
-                }
-              />
-            </Field>
-          </div>
+          <Field label="Fixed Rate">
+            <ChooseSelect
+              value={draft.fixedRate}
+              onChange={(v) => set("fixedRate", v)}
+              options={[
+                { value: "any", label: "Any" },
+                { value: "fixed", label: "Fixed" },
+                { value: "floating", label: "Floating" },
+              ]}
+            />
+          </Field>
+          <Field label="Fee Paid By User">
+            <ChooseSelect
+              value={draft.feePaidBy}
+              onChange={(v) => set("feePaidBy", v)}
+              options={[
+                { value: "any", label: "Any" },
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+              ]}
+            />
+          </Field>
+          <Field label="Payin address">
+            <Input
+              placeholder="Enter Address"
+              className="h-12 bg-muted/40"
+              value={draft.payinAddress}
+              onChange={(e) => set("payinAddress", e.target.value)}
+            />
+          </Field>
+          <Field label="Paying hash">
+            <Input
+              placeholder="Enter hash"
+              className="h-12 bg-muted/40"
+              value={draft.payingHash}
+              onChange={(e) => set("payingHash", e.target.value)}
+            />
+          </Field>
+          <Field label="Outcome currency">
+            <ChooseSelect
+              value={draft.outcomeCurrency}
+              onChange={(v) =>
+                set("outcomeCurrency", v as PaymentFilters["outcomeCurrency"])
+              }
+              options={[
+                { value: "all", label: "All" },
+                ...TOKENS.map((t) => ({ value: t, label: t })),
+              ]}
+            />
+          </Field>
         </SheetBody>
-        <SheetFooter className="justify-between">
+        <SheetFooter className="flex-col gap-2">
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={() => {
+              onApply(draft);
+              setOpen(false);
+            }}
+          >
+            Apply Filter
+          </Button>
           <Button
             variant="ghost"
+            size="lg"
+            className="w-full"
             onClick={() => {
               setDraft(EMPTY_FILTERS);
               onApply(EMPTY_FILTERS);
               setOpen(false);
             }}
           >
-            Clear all
-          </Button>
-          <Button
-            onClick={() => {
-              onApply(draft);
-              setOpen(false);
-            }}
-          >
-            Apply filters
+            Clear All
           </Button>
         </SheetFooter>
       </SheetContent>

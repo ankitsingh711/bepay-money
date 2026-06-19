@@ -24,7 +24,7 @@ export function Brand({
       priority
       className={cn(
         "select-none object-contain",
-        compact ? "size-9" : "size-14",
+        compact ? "size-12" : "size-14",
         className,
       )}
     />

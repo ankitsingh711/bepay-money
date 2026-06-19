@@ -7,6 +7,7 @@ import type {
   CreatePaymentLinkInput,
   Network,
   PaymentLinkStatus,
+  Token,
   TransactionStatus,
 } from "@/lib/types";
 import {
@@ -47,9 +48,15 @@ export const handlers = [
     const url = new URL(request.url);
     const result = listTransactions({
       status: (url.searchParams.get("status") as TransactionStatus) || "all",
+      state:
+        (url.searchParams.get("state") as "active" | "expired" | null) ||
+        "all",
       search: url.searchParams.get("search") || undefined,
       network:
         (url.searchParams.get("network") as Network | null) || undefined,
+      outcomeCurrency:
+        (url.searchParams.get("outcomeCurrency") as Token | null) ||
+        undefined,
       from: url.searchParams.get("from") || undefined,
       to: url.searchParams.get("to") || undefined,
       page: intParam(url.searchParams.get("page"), 1),

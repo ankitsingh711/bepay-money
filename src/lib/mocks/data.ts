@@ -96,6 +96,28 @@ export function buildSeed(): {
   const paymentLinks: PaymentLink[] = [];
   const transactions: Transaction[] = [];
 
+  // payment-history fields (payments table) — numeric ids + received/sent legs
+  let pid = 5193732660;
+  function paymentFields(amt: string, status: TransactionStatus) {
+    const recvIsEth = rand() > 0.85;
+    const received = recvIsEth
+      ? { amount: (0.00002 + rand() * 0.00001).toFixed(9), token: "ETH" as const }
+      : { amount: (0.95 + rand() * 0.05).toFixed(6), token: "USDC" as const };
+    const sent = {
+      amount: (0.00004 + rand() * 0.0002).toFixed(9),
+      token: "ETH" as const,
+    };
+    const paymentState: "active" | "expired" =
+      status === "expired" || status === "failed" ? "expired" : "active";
+    return {
+      paymentId: String(pid++),
+      originalPrice: amt,
+      received,
+      sent,
+      paymentState,
+    };
+  }
+
   for (let i = 0; i < 18; i++) {
     const num = 1000 + i;
     const token = pick(TOKENS);
@@ -136,6 +158,7 @@ export function buildSeed(): {
         txHash: txHash(),
         createdAt: isoOffset(createdMs - HOUR),
         paidAt: isoOffset(createdMs - HOUR + 30 * 60_000),
+        ...paymentFields(amt, "confirmed"),
       });
     }
   }
@@ -173,6 +196,7 @@ export function buildSeed(): {
       txHash: status === "pending" ? undefined : txHash(),
       createdAt: isoOffset(createdMs),
       paidAt: status === "confirmed" ? isoOffset(createdMs - HOUR) : undefined,
+      ...paymentFields(amt, status),
     });
   }
 

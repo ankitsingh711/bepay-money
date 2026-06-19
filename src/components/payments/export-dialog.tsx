@@ -1,63 +1,82 @@
 "use client";
 
 import * as React from "react";
-import { Download, FileJson, FileSpreadsheet } from "lucide-react";
+import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { transactionsService } from "@/lib/api/services";
 import { toCsv, downloadFile } from "@/lib/csv";
+import { formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { TransactionQuery } from "@/lib/types";
 
-type Format = "csv" | "json";
+type Format = "PDF" | "CSV" | "XLS";
 
 export function ExportDialog({ query }: { query: TransactionQuery }) {
   const [open, setOpen] = React.useState(false);
-  const [format, setFormat] = React.useState<Format>("csv");
+  const [format, setFormat] = React.useState<Format>("CSV");
   const [loading, setLoading] = React.useState(false);
 
   async function handleExport() {
     setLoading(true);
     try {
-      // Pull the full (unpaginated) filtered set for export.
       const result = await transactionsService.list({
         ...query,
         page: 1,
         limit: 1000,
       });
-      const stamp = "export";
-      if (format === "json") {
-        downloadFile(
-          JSON.stringify(result.data, null, 2),
-          `bepay-transactions-${stamp}.json`,
-          "application/json",
-        );
+      const rows = result.data.map((t) => ({
+        paymentId: t.paymentId,
+        orderId: t.externalReference ?? "",
+        originalPrice: `${t.originalPrice} USD`,
+        received: `${t.received.amount} ${t.received.token}`,
+        sent: `${t.sent.amount} ${t.sent.token}`,
+        status: t.paymentState,
+        date: formatDate(t.createdAt),
+      }));
+      const columns = [
+        { key: "paymentId" as const, header: "Payment ID" },
+        { key: "orderId" as const, header: "Order ID" },
+        { key: "originalPrice" as const, header: "Original Price" },
+        { key: "received" as const, header: "Amount Received" },
+        { key: "sent" as const, header: "Amount Sent" },
+        { key: "status" as const, header: "Status" },
+        { key: "date" as const, header: "Date" },
+      ];
+      const csv = toCsv(rows, columns);
+
+      if (format === "CSV") {
+        downloadFile(csv, "bepay-payments.csv", "text/csv");
+      } else if (format === "XLS") {
+        downloadFile(csv, "bepay-payments.xls", "application/vnd.ms-excel");
       } else {
-        const csv = toCsv(result.data, [
-          { key: "id", header: "Transaction ID" },
-          { key: "paymentLinkTitle", header: "Title" },
-          { key: "customerReference", header: "Customer" },
-          { key: "amount", header: "Amount" },
-          { key: "currency", header: "Token" },
-          { key: "network", header: "Network" },
-          { key: "status", header: "Status" },
-          { key: "createdAt", header: "Created" },
-        ]);
-        downloadFile(
-          csv,
-          `bepay-transactions-${stamp}.csv`,
-          "text/csv",
-        );
+        // PDF — open a printable view (browser "Save as PDF")
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.write(
+            `<title>bepay payments</title><h2>Payments</h2><table border="1" cellpadding="6" style="border-collapse:collapse;font-family:sans-serif;font-size:12px">` +
+              `<tr>${columns.map((c) => `<th>${c.header}</th>`).join("")}</tr>` +
+              rows
+                .map(
+                  (r) =>
+                    `<tr>${columns
+                      .map((c) => `<td>${r[c.key]}</td>`)
+                      .join("")}</tr>`,
+                )
+                .join("") +
+              `</table>`,
+          );
+          win.document.close();
+          win.print();
+        }
       }
-      toast.success(`Exported ${result.data.length} transactions`);
+      toast.success(`Exported ${rows.length} payments as ${format}`);
       setOpen(false);
     } catch {
       toast.error("Export failed — please try again");
@@ -66,52 +85,49 @@ export function ExportDialog({ query }: { query: TransactionQuery }) {
     }
   }
 
-  const options: { value: Format; label: string; icon: typeof FileJson }[] = [
-    { value: "csv", label: "CSV", icon: FileSpreadsheet },
-    { value: "json", label: "JSON", icon: FileJson },
-  ];
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="h-10">
-          <Download />
+        <Button size="sm" className="h-11">
           Export
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Choose the format to export</DialogTitle>
-          <DialogDescription>
-            Download your filtered transactions.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
-          {options.map((o) => {
-            const Icon = o.icon;
-            const active = format === o.value;
-            return (
+      <DialogContent className="max-w-lg">
+        <DialogTitle className="sr-only">Choose the format to export</DialogTitle>
+        <div className="flex flex-col items-center gap-6 py-2">
+          <span className="flex size-20 items-center justify-center rounded-2xl text-foreground">
+            <Download className="size-12" strokeWidth={1.3} />
+          </span>
+          <p className="text-xl font-bold">Choose the format to export</p>
+
+          <div className="flex justify-center gap-3">
+            {(["PDF", "CSV", "XLS"] as Format[]).map((f) => (
               <button
-                key={o.value}
+                key={f}
                 type="button"
-                onClick={() => setFormat(o.value)}
+                onClick={() => setFormat(f)}
+                aria-pressed={format === f}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-2xl border-2 p-5 transition-colors",
-                  active
-                    ? "border-primary bg-muted/50"
-                    : "border-border hover:border-foreground/20",
+                  "rounded-full border px-8 py-3 text-sm font-medium transition-colors",
+                  format === f
+                    ? "border-foreground bg-foreground text-background"
+                    : "border-border hover:border-foreground/30",
                 )}
-                aria-pressed={active}
               >
-                <Icon className="size-7" />
-                <span className="text-sm font-medium">{o.label}</span>
+                {f}
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={handleExport}
+            disabled={loading}
+          >
+            {loading ? "Exporting…" : "Export"}
+          </Button>
         </div>
-        <Button onClick={handleExport} disabled={loading} className="w-full">
-          {loading ? "Exporting…" : "Export"}
-        </Button>
       </DialogContent>
     </Dialog>
   );
