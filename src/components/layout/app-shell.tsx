@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={() => setCollapsed((c) => !c)}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="absolute -right-3.5 top-1/2 z-40 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-colors hover:bg-muted"
+          className="absolute -right-6.5 top-[85px] z-[99] flex size-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-colors hover:bg-muted"
         >
           {collapsed ? (
             <ChevronRight className="size-4" />
