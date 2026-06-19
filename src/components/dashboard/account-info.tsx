@@ -2,16 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowDownLeft,
-  ArrowLeftRight,
-  ArrowUpRight,
-  Eye,
-  EyeOff,
-  Link2,
-  Wallet as WalletIcon,
-  type LucideIcon,
-} from "lucide-react";
+import { Eye, EyeOff, Wallet as WalletIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/hooks/queries";
 import { formatUsd } from "@/lib/format";
@@ -21,11 +12,11 @@ import { SwapSheet } from "@/components/wallet/swap-sheet";
 
 type ActionKey = "send" | "receive" | "pay" | "swap";
 
-const ACTIONS: { key: ActionKey; label: string; icon: LucideIcon }[] = [
-  { key: "send", label: "Send", icon: ArrowUpRight },
-  { key: "receive", label: "Recieve", icon: ArrowDownLeft },
-  { key: "pay", label: "Pay Link", icon: Link2 },
-  { key: "swap", label: "Swap", icon: ArrowLeftRight },
+const ACTIONS: { key: ActionKey; label: string; icon: string }[] = [
+  { key: "send", label: "Send", icon: "/dashboard-button/send.png" },
+  { key: "receive", label: "Recieve", icon: "/dashboard-button/receive.png" },
+  { key: "pay", label: "Pay Link", icon: "/dashboard-button/pay-link.png" },
+  { key: "swap", label: "Swap", icon: "/dashboard-button/swap.png" },
 ];
 
 export function AccountInfo() {
@@ -87,20 +78,23 @@ export function AccountInfo() {
 
         {/* actions */}
         <div className="mt-6 grid w-full grid-cols-2 gap-3 px-2 sm:grid-cols-4 sm:px-6">
-          {ACTIONS.map((a) => {
-            const Icon = a.icon;
-            return (
-              <button
-                key={a.key}
-                type="button"
-                onClick={() => trigger(a.key)}
-                className="flex items-center justify-between gap-2 rounded-2xl border border-border/60 bg-muted/60 px-4 py-4 text-[15px] font-medium shadow-sm transition-colors hover:bg-muted"
-              >
-                {a.label}
-                <Icon className="size-5 text-muted-foreground" />
-              </button>
-            );
-          })}
+          {ACTIONS.map((a) => (
+            <button
+              key={a.key}
+              type="button"
+              onClick={() => trigger(a.key)}
+              className="flex items-center justify-between gap-2 whitespace-nowrap rounded-2xl bg-muted/70 px-4 py-4 text-[17px] font-medium text-foreground shadow-sm ring-1 ring-black/[0.03] transition-colors hover:bg-muted"
+            >
+              {a.label}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={a.icon}
+                alt=""
+                aria-hidden
+                className="size-7 shrink-0 object-contain"
+              />
+            </button>
+          ))}
         </div>
       </div>
 
