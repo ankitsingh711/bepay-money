@@ -4,6 +4,11 @@ A responsive merchant payment experience for **bepay**, a non-custodial crypto p
 
 Built as a take-home assignment. No real blockchain, wallet, or settlement functionality — all payment data is mocked and the app is designed as though it integrates with a real backend API.
 
+> **🔗 Live demo:** **https://bepay-money.vercel.app**
+> **📦 Source:** https://github.com/ankitsingh711/bepay-money
+>
+> The live demo seeds itself with mock data on first load. To enter the app directly, sign in from `/login` (any credentials work) or complete the onboarding flow — the session is mocked client-side.
+
 ---
 
 ## Tech stack
@@ -122,14 +127,14 @@ Built to match the provided Figma dashboard: a dark app shell (collapsible sideb
 - **Transaction detail** as a drawer on the list **and** a deep-linkable page (`/payments/:id`).
 - **CSV / JSON export** of the filtered set (optional enhancement).
 
-### C. Create payment link
-- Validated form (title, amount, token, network, optional description, expiry, optional reference) with inline errors.
-- On success: generated **payment URL**, **QR code**, amount/token/network, expiry, status, **copy** action, and "view details / create another".
+### C. Payment links (list + create)
+- **Invoice-style table**: Invoice ID, Order ID, currency, copyable invoice URL, status pills (**Completed / In progress / Failed**), created/updated date & time, with zebra striping, search, an **Apply Filters** drawer (payment status, fixed rate, fee-paid-by, payin address, hash, outcome currency) and pagination.
+- **Create Payment Tools** modal: pay currency, price, "link for?", collapsible **Additional Settings** (partial payments, reference ID, expiry, internal notes), optional **Customer Details** → success screen with the generated link, copy, and "Share via other apps".
+- **Customize payment page** editor (`/payment-links/customize`): logo upload, theme colour, text size & brightness, tagline/description with a **live preview** that drives the public pay page.
 
-### D. Payment-link detail
-- Title + status, amount/token/network, created & expiry, payment URL + copy, QR.
-- Distinct **active / paid / expired** state presentation.
-- **Associated transaction** card (links to the transaction) once a payment exists.
+### D. Payment-link detail & public page
+- Detail view: title + status, amount/token/network, created & expiry, payment URL + copy, QR, distinct **active / paid / expired** presentation, and an **associated transaction** card once a payment exists.
+- **Public payment page** (`/pay/[id]`): the customer-facing, unauthenticated page — branded split layout, multi-step deposit flow (choose asset → send → success).
 
 ### E. Authentication & onboarding (mocked — optional enhancement)
 - **Login** and a full **multi-step onboarding journey**: Create Account → verify email (OTP) → create password → create business account → registered → create shop → shop address (map placeholder) → reward / done.
@@ -139,7 +144,8 @@ Built to match the provided Figma dashboard: a dark app shell (collapsible sideb
 
 ### F. Wallet & money movement (mocked)
 - Dashboard **"My Account Info" wallet card**: balance (with hide toggle), address, and **Send / Receive / Pay Link / Swap** quick actions.
-- **Send** (token → amount → recipient → review → success), **Receive** (address + QR), **Swap** (token-to-token with indicative rate), **Withdraw** (amount → destination → OTP → success, opened from the topbar). All multi-step dialogs with validation and mocked confirmations. Backed by `GET /api/wallet`.
+- **Send** and **Swap** are full right-side **slide-over flows** (token picker with chain filters, address book / contacts, amount, confirmation, security passcode, slippage settings, history) matching the Figma; **Receive** (address + QR) and **Withdraw** (wallet → amount → provider → preview → price alert → OTP, opened from the topbar) are multi-step flows with validation and mocked confirmations. Backed by `GET /api/wallet`.
+- **Create wallet** onboarding (`/wallet/new`): select network → seed-phrase wallet → passcode → confirm → biometrics → notifications → backup (manual seed-phrase + confirm quiz, or iCloud name + encryption password).
 
 ### G. Public payment page (`/pay/[id]`)
 - The customer-facing page a payment link resolves to — outside the app shell and unauthenticated.
@@ -162,9 +168,9 @@ Built to match the provided Figma dashboard: a dark app shell (collapsible sideb
 2. The **four required flows** end-to-end (dashboard → payments → create link → link detail) over breadth.
 3. **States** (loading/empty/error/validation) throughout, since "feel coherent" matters more than extra screens.
 
-**Assumptions (design was provided as zoomed-out Figma boards)**
-- The merchant app is the in-scope surface; onboarding/login/wallet/swap/withdraw flows in the file are out of scope for this assignment.
-- Exact hex values and some copy weren't legible at the provided zoom, so design **tokens** were extracted to match the system (dark sidebar, light canvas, white cards, black pill buttons, green/amber/red/slate status colours) and are centralised in `globals.css` — trivially tunable to pixel-match a high-res frame.
+**Assumptions (design was provided as Figma frames / screenshots)**
+- Beyond the four required merchant flows, the provided designs also covered onboarding/login, wallet money-movement (send/receive/swap/withdraw), create-wallet, and the public pay/customize pages — these were built to match the screenshots as faithful, fully-mocked UI.
+- Where exact hex/copy weren't legible, design **tokens** were extracted to match the system (dark sidebar, light canvas, white cards, black pill buttons, green/amber/red/slate status colours) and centralised in `globals.css` — trivially tunable to pixel-match a high-res frame. Supplied raster assets (card art, button icons, illustrations) are used directly from `public/`.
 - Dashboard headline totals are shown in a single display currency (USDC) for the demo; a real API would FX-convert per token.
 
 **Intentionally simplified / excluded**
