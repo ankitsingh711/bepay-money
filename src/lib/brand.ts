@@ -4,14 +4,27 @@
 export interface Brand {
   businessName: string;
   tagline: string;
+  /** Supporting copy shown under the tagline on the public payment page. */
+  description: string;
   /** Accent colour (hex) used on the public payment page. */
   color: string;
+  /** Optional uploaded logo (data URL). Falls back to the bepay logo. */
+  logo: string | null;
+  /** Heading text scale, percent (85–120). */
+  textSize: number;
+  /** Background brightness of the dark brand panel, percent (55–110). */
+  brightness: number;
 }
 
 export const DEFAULT_BRAND: Brand = {
   businessName: "bepay business",
   tagline: "A bank that unites finance",
+  description:
+    "Join us in reshaping the future of finance where security, flexibility, and inclusivity are at the core of everything we do.",
   color: "#0b0e14",
+  logo: null,
+  textSize: 100,
+  brightness: 100,
 };
 
 const KEY = "bepay.brand";

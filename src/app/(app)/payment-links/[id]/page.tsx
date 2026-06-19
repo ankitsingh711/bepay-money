@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  Palette,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -126,12 +127,20 @@ export default function PaymentLinkDetailPage({
 
               <LinkInfo link={data} showQr={data.status !== "expired"} />
 
-              <Button variant="outline" className="w-full" asChild>
-                <Link href={`/pay/${data.id}`} target="_blank">
-                  <ExternalLink />
-                  Preview payment page
-                </Link>
-              </Button>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button variant="outline" asChild>
+                  <Link href={`/pay/${data.id}`} target="_blank">
+                    <ExternalLink />
+                    Preview payment page
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link href="/payment-links/customize">
+                    <Palette />
+                    Customize page
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

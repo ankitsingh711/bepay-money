@@ -6,7 +6,7 @@ import { Check, ChevronDown, Copy, Grip, Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QrCode } from "@/components/payment-links/qr-code";
-import { Brand } from "@/components/layout/brand";
+import { PayBrandPanel } from "@/components/payment-links/pay-brand-panel";
 import { usePaymentLink } from "@/hooks/queries";
 import { useBrand } from "@/hooks/use-brand";
 import { formatMoney } from "@/lib/money";
@@ -62,19 +62,7 @@ export default function PublicPayPage({
     <div className="min-h-screen bg-sidebar p-3 sm:p-5">
       <div className="relative grid min-h-[calc(100vh-1.5rem)] overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#15181f] to-black sm:min-h-[calc(100vh-2.5rem)] lg:grid-cols-2">
         {/* LEFT — brand */}
-        <div className="relative flex flex-col justify-between p-8 sm:p-12">
-          <Brand />
-          <CubeArt />
-          <div className="relative z-10 max-w-md space-y-4">
-            <h1 className="text-4xl font-semibold leading-tight text-white sm:text-5xl">
-              {brand.tagline}
-            </h1>
-            <p className="text-sm leading-relaxed text-white/55">
-              Join us in reshaping the future of finance where security,
-              flexibility, and inclusivity are at the core of everything we do.
-            </p>
-          </div>
-        </div>
+        <PayBrandPanel brand={brand} />
 
         {/* RIGHT — widget */}
         <div className="relative z-10 flex items-center justify-center p-6 sm:p-10">
@@ -139,6 +127,7 @@ export default function PublicPayPage({
                       setAssetOpen(false);
                     }}
                     amountLabel={amountLabel}
+                    accent={brand.color}
                     onNext={() => setStage("deposit")}
                   />
                 )}
@@ -153,6 +142,7 @@ export default function PublicPayPage({
                     onSendAmount={setSendAmount}
                     currency={data.currency}
                     onCopy={copy}
+                    accent={brand.color}
                     onNext={confirmDeposit}
                     confirming={confirming}
                   />
@@ -263,6 +253,7 @@ function ChooseAssets({
   onToggle,
   onSelect,
   amountLabel,
+  accent,
   onNext,
 }: {
   asset: (typeof ASSETS)[number];
@@ -270,6 +261,7 @@ function ChooseAssets({
   onToggle: () => void;
   onSelect: (a: (typeof ASSETS)[number]) => void;
   amountLabel: string;
+  accent: string;
   onNext: () => void;
 }) {
   return (
@@ -319,7 +311,8 @@ function ChooseAssets({
       <button
         type="button"
         onClick={onNext}
-        className="h-12 w-full rounded-full bg-muted text-sm font-medium text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
+        style={{ backgroundColor: accent }}
+        className="h-12 w-full rounded-full text-sm font-medium text-white transition-opacity hover:opacity-90"
       >
         Next
       </button>
@@ -336,6 +329,7 @@ function SendDeposit({
   onSendAmount,
   currency,
   onCopy,
+  accent,
   onNext,
   confirming,
 }: {
@@ -347,6 +341,7 @@ function SendDeposit({
   onSendAmount: (v: string) => void;
   currency: string;
   onCopy: (t: string) => void;
+  accent: string;
   onNext: () => void;
   confirming: boolean;
 }) {
@@ -433,7 +428,8 @@ function SendDeposit({
         type="button"
         onClick={onNext}
         disabled={confirming}
-        className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-70"
+        style={{ backgroundColor: accent }}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-70"
       >
         {confirming && <Loader2 className="size-4 animate-spin" />}
         {confirming ? "Processing…" : "Next"}
@@ -442,44 +438,3 @@ function SendDeposit({
   );
 }
 
-function CubeArt() {
-  return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-90">
-      <svg
-        viewBox="0 0 300 300"
-        className="h-[60%] max-h-[460px] w-auto"
-        fill="none"
-      >
-        <defs>
-          <linearGradient id="cubeTop" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#3a3f49" />
-            <stop offset="100%" stopColor="#23272f" />
-          </linearGradient>
-          <linearGradient id="cubeLeft" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1c1f26" />
-            <stop offset="100%" stopColor="#0f1116" />
-          </linearGradient>
-          <linearGradient id="cubeRight" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#272b33" />
-            <stop offset="100%" stopColor="#15181e" />
-          </linearGradient>
-        </defs>
-        {/* top */}
-        <path d="M150 40 260 100 150 160 40 100Z" fill="url(#cubeTop)" stroke="#000" strokeOpacity="0.3" />
-        {/* left */}
-        <path d="M40 100 150 160 150 280 40 220Z" fill="url(#cubeLeft)" stroke="#000" strokeOpacity="0.3" />
-        {/* right */}
-        <path d="M260 100 150 160 150 280 260 220Z" fill="url(#cubeRight)" stroke="#000" strokeOpacity="0.3" />
-        {/* subtle grid lines */}
-        {[0.25, 0.5, 0.75].map((t) => (
-          <path
-            key={t}
-            d={`M${40 + (150 - 40) * t} ${100 + (160 - 100) * t} ${260 - (260 - 150) * t} ${100 + (160 - 100) * t}`}
-            stroke="#fff"
-            strokeOpacity="0.04"
-          />
-        ))}
-      </svg>
-    </div>
-  );
-}

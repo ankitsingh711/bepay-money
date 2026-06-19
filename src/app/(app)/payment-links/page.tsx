@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Link2, Plus, Search } from "lucide-react";
+import { Link2, Palette, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -74,12 +74,20 @@ export default function PaymentLinksPage() {
             aria-label="Search payment links"
           />
         </div>
-        <Button asChild className="h-10">
-          <Link href="/payment-links/new">
-            <Plus />
-            Create payment link
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild variant="outline" className="h-10">
+            <Link href="/payment-links/customize">
+              <Palette />
+              Customize page
+            </Link>
+          </Button>
+          <Button asChild className="h-10">
+            <Link href="/payment-links/new">
+              <Plus />
+              Create payment link
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div
