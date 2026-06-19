@@ -82,8 +82,11 @@ export function TurnoverPanel() {
       {/* chart */}
       <BarChart data={data} highlightIndex={highlight} tooltip="$ 653.09" />
 
-      {/* plan donut */}
-      <div className="flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-[#1b1f27] to-black p-5 text-white">
+      {/* plan donut — stacked-card effect */}
+      <div className="relative mt-3">
+        <div className="absolute -top-3 left-8 right-8 h-6 rounded-2xl bg-foreground/15" />
+        <div className="absolute -top-1.5 left-4 right-4 h-6 rounded-2xl bg-foreground/30" />
+        <div className="relative flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-[#1b1f27] to-black p-6 text-white">
         <div>
           <p className="text-sm text-white/60">Plan for May</p>
           <p className="text-2xl font-bold">Completed</p>
@@ -107,6 +110,7 @@ export function TurnoverPanel() {
             </linearGradient>
           </defs>
         </svg>
+        </div>
       </div>
     </div>
   );
