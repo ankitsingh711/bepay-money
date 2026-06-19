@@ -17,7 +17,7 @@ import { useWallet } from "@/hooks/queries";
 import { formatUsd } from "@/lib/format";
 import { SendSheet } from "@/components/wallet/send-sheet";
 import { ReceiveDialog } from "@/components/wallet/receive-dialog";
-import { SwapDialog } from "@/components/wallet/swap-dialog";
+import { SwapSheet } from "@/components/wallet/swap-sheet";
 
 type ActionKey = "send" | "receive" | "pay" | "swap";
 
@@ -109,7 +109,7 @@ export function AccountInfo() {
         open={open === "receive"}
         onOpenChange={(o) => !o && setOpen(null)}
       />
-      <SwapDialog open={open === "swap"} onOpenChange={(o) => !o && setOpen(null)} />
+      <SwapSheet open={open === "swap"} onOpenChange={(o) => !o && setOpen(null)} />
     </div>
   );
 }
