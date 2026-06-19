@@ -2,7 +2,6 @@
 
 // Lightweight dependency-free bar chart (matches the dashboard turnover panel).
 
-import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export interface BarDatum {
@@ -24,41 +23,57 @@ export function BarChart({
   const max = Math.max(...data.map((d) => d.value), 1);
 
   return (
-    <div className={cn("flex h-48 items-stretch gap-2 sm:gap-3", className)}>
-      {data.map((d, i) => {
-        const heightPct = Math.max((d.value / max) * 100, 6);
-        const highlighted = i === highlightIndex;
-        return (
-          <div
-            key={d.label}
-            className="flex h-full flex-1 flex-col items-center gap-2"
-          >
-            <div className="relative flex w-full flex-1 items-end">
-              {highlighted && tooltip && (
-                <div className="absolute -top-1 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center">
-                  <span className="whitespace-nowrap rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-semibold shadow-md">
-                    {tooltip}
-                  </span>
-                  <span className="h-3 w-px bg-border" />
-                  <span className="size-2 -translate-y-1 rounded-full bg-foreground" />
-                </div>
-              )}
-              <div
-                className={cn(
-                  "w-full rounded-t-lg transition-all",
-                  highlighted
-                    ? "bg-gradient-to-t from-foreground to-foreground/70"
-                    : "bg-gradient-to-t from-foreground/70 via-muted-foreground/30 to-muted",
+    <div className={cn("relative", className)}>
+      {/* faint grid backdrop */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-52"
+        style={{
+          backgroundImage:
+            "linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px)",
+          backgroundSize: "100% 25%, 14.28% 100%",
+          opacity: 0.5,
+        }}
+      />
+
+      <div className="relative flex h-52 items-end gap-2 sm:gap-3">
+        {data.map((d, i) => {
+          const heightPct = Math.max((d.value / max) * 100, 6);
+          const highlighted = i === highlightIndex;
+          return (
+            <div key={d.label} className="flex h-full flex-1 flex-col">
+              <div className="relative flex w-full flex-1 items-end">
+                {/* floating tooltip with connector for the highlighted bar */}
+                {highlighted && tooltip && (
+                  <div className="absolute inset-x-0 top-0 z-10 flex flex-col items-center">
+                    <span className="size-2 rounded-full bg-foreground" />
+                    <span className="h-5 w-px bg-border" />
+                    <span className="whitespace-nowrap rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-semibold shadow-md">
+                      {tooltip}
+                    </span>
+                  </div>
                 )}
-                style={{ height: `${heightPct}%` }}
-                role="img"
-                aria-label={`${d.label}: ${d.value}`}
-              />
+                <div
+                  className={cn(
+                    "w-full rounded-t-lg bg-gradient-to-b from-muted via-muted-foreground/30 to-foreground transition-all",
+                  )}
+                  style={{ height: `${heightPct}%` }}
+                  role="img"
+                  aria-label={`${d.label}: ${d.value}`}
+                />
+              </div>
             </div>
+          );
+        })}
+      </div>
+
+      {/* month labels */}
+      <div className="mt-2 flex gap-2 sm:gap-3">
+        {data.map((d, i) => (
+          <div key={d.label} className="flex flex-1 justify-center">
             <span
               className={cn(
-                "flex h-6 items-center rounded-full px-2 text-[11px]",
-                highlighted
+                "flex h-6 items-center rounded-full px-2.5 text-[11px]",
+                i === highlightIndex
                   ? "bg-foreground font-medium text-background"
                   : "text-muted-foreground",
               )}
@@ -66,8 +81,8 @@ export function BarChart({
               {d.label}
             </span>
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

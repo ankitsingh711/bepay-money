@@ -2,10 +2,11 @@ import { DonutChart } from "@/components/charts/donut-chart";
 import { formatUsd } from "@/lib/format";
 
 const SEGMENTS = [
-  { label: "Litecoin", value: 35, color: "var(--chart-3)" },
-  { label: "Ethereum Classic", value: 28, color: "var(--chart-2)" },
-  { label: "H0dlcoin", value: 22, color: "var(--chart-4)" },
-  { label: "Others", value: 15, color: "var(--chart-5)" },
+  { label: "Litecoin", value: 30, color: "#f3ba2f" },
+  { label: "Ethereum Classic", value: 34, color: "#3b6fe0" },
+  { label: "H0dlcoin", value: 20, color: "#2ea66b" },
+  { label: "Others", value: 9, color: "#7c5cff" },
+  { label: "Misc", value: 7, color: "#e0533b" },
 ];
 
 const COINS = [
