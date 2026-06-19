@@ -19,7 +19,7 @@ import { truncateMiddle } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { SendDialog } from "./send-dialog";
 import { ReceiveDialog } from "./receive-dialog";
-import { SwapDialog } from "./swap-dialog";
+import { SwapSheet } from "./swap-sheet";
 
 type ActionKey = "send" | "receive" | "pay" | "swap";
 
@@ -97,7 +97,7 @@ export function WalletCard() {
         open={open === "receive"}
         onOpenChange={(o) => !o && setOpen(null)}
       />
-      <SwapDialog open={open === "swap"} onOpenChange={(o) => !o && setOpen(null)} />
+      <SwapSheet open={open === "swap"} onOpenChange={(o) => !o && setOpen(null)} />
     </Card>
   );
 }
