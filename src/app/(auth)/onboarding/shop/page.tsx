@@ -2,43 +2,45 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, LocateFixed } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
-import { Input, Textarea } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { StepProgress } from "@/components/auth/step-progress";
+import { LocationPicker } from "@/components/auth/location-picker";
 import { updateDraft } from "@/lib/onboarding";
-
-const CATEGORIES = [
-  "Retail",
-  "Food & Beverage",
-  "Services",
-  "Digital goods",
-  "Other",
-];
 
 export default function CreateShopPage() {
   const router = useRouter();
-  const [shopName, setShopName] = React.useState("");
-  const [category, setCategory] = React.useState("Retail");
-  const [description, setDescription] = React.useState("");
-  const [error, setError] = React.useState<string>();
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  const [values, setValues] = React.useState({
+    shopName: "",
+    shopAddress: "",
+    dob: "",
+    from: "",
+    till: "",
+    openDays: "",
+  });
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
+
+  function set(key: keyof typeof values, value: string) {
+    setValues((v) => ({ ...v, [key]: value }));
+  }
+
+  const isValid =
+    values.shopName.trim().length >= 2 && values.shopAddress.trim().length >= 3;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (shopName.trim().length < 2) {
-      setError("Shop name is required");
-      return;
-    }
-    updateDraft({ shopName });
-    router.push("/onboarding/shop-address");
+    const next: Record<string, string> = {};
+    if (values.shopName.trim().length < 2)
+      next.shopName = "Shop name is required";
+    if (values.shopAddress.trim().length < 3)
+      next.shopAddress = "Shop address is required";
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    updateDraft({ shopName: values.shopName });
+    router.push("/onboarding/done");
   }
 
   return (
@@ -52,52 +54,110 @@ export default function CreateShopPage() {
         Back
       </button>
 
-      <StepProgress current={3} total={3} label="Create your shop" />
+      <StepProgress current={2} total={2} />
 
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Create Shop</h1>
-        <p className="text-sm text-muted-foreground">
-          Tell us about your shop so customers know who they’re paying.
-        </p>
-      </div>
+      <h1 className="text-center text-3xl font-bold tracking-tight">
+        Create Shop
+      </h1>
 
-      <form onSubmit={submit} className="space-y-4" noValidate>
-        <Field label="Shop name" htmlFor="shopName" error={error}>
+      <form onSubmit={submit} className="space-y-5" noValidate>
+        <Field label="Shop name" htmlFor="shopName" error={errors.shopName}>
           <Input
             id="shopName"
-            placeholder="e.g. Acme Store"
-            value={shopName}
-            invalid={!!error}
-            onChange={(e) => setShopName(e.target.value)}
-          />
-        </Field>
-        <Field label="Category">
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c} value={c}>
-                  {c}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="Description" htmlFor="desc" optional>
-          <Textarea
-            id="desc"
-            placeholder="What does your shop sell?"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter Shop name"
+            className="h-14 bg-muted/50"
+            value={values.shopName}
+            invalid={!!errors.shopName}
+            onChange={(e) => set("shopName", e.target.value)}
           />
         </Field>
 
-        <Button type="submit" size="lg" className="w-full">
-          Continue
+        <Field
+          label="Shop Address"
+          htmlFor="shopAddress"
+          error={errors.shopAddress}
+        >
+          <div className="relative">
+            <Input
+              id="shopAddress"
+              placeholder="Enter Shop Address"
+              className="h-14 bg-muted/50 pr-11"
+              value={values.shopAddress}
+              invalid={!!errors.shopAddress}
+              onChange={(e) => set("shopAddress", e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              aria-label="Pick location on map"
+              className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <LocateFixed className="size-5" />
+            </button>
+          </div>
+        </Field>
+
+        <Field label="Date of birth" htmlFor="dob">
+          <div className="relative">
+            <Input
+              id="dob"
+              type="date"
+              className="h-14 bg-muted/50 pr-11"
+              value={values.dob}
+              onChange={(e) => set("dob", e.target.value)}
+            />
+            <CalendarDays className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+          </div>
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="From" htmlFor="from">
+            <div className="relative">
+              <Input
+                id="from"
+                type="time"
+                className="h-14 bg-muted/50 pr-11"
+                value={values.from}
+                onChange={(e) => set("from", e.target.value)}
+              />
+              <Clock className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </Field>
+          <Field label="Till" htmlFor="till">
+            <div className="relative">
+              <Input
+                id="till"
+                type="time"
+                className="h-14 bg-muted/50 pr-11"
+                value={values.till}
+                onChange={(e) => set("till", e.target.value)}
+              />
+              <Clock className="pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </Field>
+        </div>
+
+        <Field label="Open Days" htmlFor="openDays">
+          <Input
+            id="openDays"
+            placeholder="Days your shop is open"
+            className="h-14 bg-muted/50"
+            value={values.openDays}
+            onChange={(e) => set("openDays", e.target.value)}
+          />
+        </Field>
+
+        <Button type="submit" size="lg" className="w-full" disabled={!isValid}>
+          Next
         </Button>
       </form>
+
+      <LocationPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onConfirm={(addr) => set("shopAddress", addr)}
+      />
     </div>
   );
 }
+

@@ -54,7 +54,7 @@ export default function BusinessAccountPage() {
         Back
       </button>
 
-      <StepProgress current={2} total={3} label="Business details" />
+      <StepProgress current={1} total={2} label="Business details" />
 
       <div className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">

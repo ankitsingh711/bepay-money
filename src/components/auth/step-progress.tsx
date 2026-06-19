@@ -23,11 +23,11 @@ export function StepProgress({
           />
         ))}
       </div>
-      {label && (
-        <p className="text-xs font-medium text-muted-foreground">
-          Step {current} of {total} — {label}
-        </p>
-      )}
+      <p className="text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">{current}</span> of{" "}
+        {total}
+        {label ? ` — ${label}` : ""}
+      </p>
     </div>
   );
 }
