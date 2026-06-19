@@ -15,7 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/hooks/queries";
 import { formatUsd } from "@/lib/format";
-import { SendDialog } from "@/components/wallet/send-dialog";
+import { SendSheet } from "@/components/wallet/send-sheet";
 import { ReceiveDialog } from "@/components/wallet/receive-dialog";
 import { SwapDialog } from "@/components/wallet/swap-dialog";
 
@@ -104,7 +104,7 @@ export function AccountInfo() {
         </div>
       </div>
 
-      <SendDialog open={open === "send"} onOpenChange={(o) => !o && setOpen(null)} />
+      <SendSheet open={open === "send"} onOpenChange={(o) => !o && setOpen(null)} />
       <ReceiveDialog
         open={open === "receive"}
         onOpenChange={(o) => !o && setOpen(null)}
