@@ -30,27 +30,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
       >
         <SidebarNav collapsed={collapsed} />
+
+        {/* collapse toggle — anchored to the sidebar's right edge */}
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3.5 top-1/2 z-40 flex size-7 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-colors hover:bg-muted"
+        >
+          {collapsed ? (
+            <ChevronRight className="size-4" />
+          ) : (
+            <ChevronLeft className="size-4" />
+          )}
+        </button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar title={title} />
 
         {/* white content panel */}
-        <main className="relative flex-1 px-2 pb-2 sm:px-3 sm:pb-3">
-          {/* collapse toggle */}
-          <button
-            type="button"
-            onClick={() => setCollapsed((c) => !c)}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="absolute left-0 top-6 z-20 hidden size-7 -translate-x-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-md transition-colors hover:bg-muted lg:flex"
-          >
-            {collapsed ? (
-              <ChevronRight className="size-4" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
-          </button>
-
+        <main className="flex-1 px-2 pb-2 sm:px-3 sm:pb-3">
           <div className="min-h-[calc(100vh-5rem)] rounded-3xl bg-card px-4 py-6 sm:px-6 lg:px-8">
             {children}
           </div>

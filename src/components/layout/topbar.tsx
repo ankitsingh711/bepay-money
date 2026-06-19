@@ -19,7 +19,7 @@ export function Topbar({ title }: { title: string }) {
   const [withdrawOpen, setWithdrawOpen] = React.useState(false);
 
   return (
-    <header className="flex h-16 items-center gap-3 px-4 text-white sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 bg-sidebar px-4 text-white sm:px-6">
       {/* mobile menu */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetTrigger asChild>
